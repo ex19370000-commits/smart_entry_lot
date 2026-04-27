@@ -158,3 +158,8 @@ LINEログイン、SMS認証、Cookie監視を組み合わせた、**「単体�
 ### 10-3. キャッチアップ不足の懸念
 - 外部API連携時の例外処理とセキュリティ設計。
 - 大規模アクセスを想定した非同期処理（Sidekiq/Redis）の最適化。
+
+
+
+### 画面遷移図
+[画面遷移図（Figma）](https://www.figma.com/design/Yr5A2AnwxdfKtsklLqDTwb/Smart-Entry-Lot%E7%94%BB%E9%9D%A2%E9%81%B7%E7%A7%BB%E5%9B%B3?node-id=3-18&t=pZBxbsj7VB0ofyfI-1)
