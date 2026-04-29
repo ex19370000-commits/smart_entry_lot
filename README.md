@@ -162,4 +162,4 @@ LINEログイン、SMS認証、Cookie監視を組み合わせた、**「単体�
 
 
 ### 画面遷移図
-[画面遷移図（Figma）](https://www.figma.com/design/Yr5A2AnwxdfKtsklLqDTwb/Smart-Entry-Lot%E7%94%BB%E9%9D%A2%E9%81%B7%E7%A7%BB%E5%9B%B3?node-id=3-18&t=pZBxbsj7VB0ofyfI-1)
+[画面遷移図（Figma）](https://www.figma.com/design/Yr5A2AnwxdfKtsklLqDTwb/Smart-Entry-Lot%E7%94%BB%E9%9D%A2%E9%81%B7%E7%A7%BB%E5%9B%B3?node-id=24-2&t=DGBI5gT1zXu1wsCL-1)  
