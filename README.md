@@ -166,4 +166,4 @@ LINEログイン、SMS認証、Cookie監視を組み合わせた、**「単体�
 
 
 ### ER図
-[ER図][![Image from Gyazo](https://i.gyazo.com/0df89827e2236260582ba83c4b9e0a15.png)](https://gyazo.com/0df89827e2236260582ba83c4b9e0a15)
+[ER図][![Image from Gyazo](https://i.gyazo.com/71908c9b858f7a288dcccf0ac4300074.png)](https://gyazo.com/71908c9b858f7a288dcccf0ac4300074)
