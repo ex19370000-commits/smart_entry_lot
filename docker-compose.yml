@@ -1,0 +1,46 @@
+version: '3'
+services:
+  db:
+    # MySQLからPostgreSQLに変更
+    image: postgres:16
+    environment:
+      # Postgres用の環境変数
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      # 保存先ディレクトリもPostgres用に修正
+      - db-data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    command: bundle exec rails s -p 3000 -b '0.0.0.0'
+    container_name: smart_entry_lot_container
+    tty: true
+    stdin_open: true
+    volumes:
+      - .:/smart_entry_lot
+      - bundle_data:/usr/local/bundle:cached
+    environment:
+      TZ: Asia/Tokyo
+      # database.ymlで参照するパスワード
+      DATABASE_PASSWORD: password
+      # Postgresのデフォルトユーザー名を指定（必要に応じて）
+      DATABASE_USER: postgres
+      SELENIUM_DRIVER_URL: http://chrome:4444/wd/hub
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - chrome
+
+  chrome:
+    # Apple Silicon(M1/M2/M3)に最適化されたイメージを維持
+    image: seleniarm/standalone-chromium:latest
+    ports:
+      - 4444:4444
+
+volumes:
+  db-data:
+  bundle_data:
