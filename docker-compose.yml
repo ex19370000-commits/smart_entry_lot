@@ -1,14 +1,17 @@
 version: '3'
 services:
   db:
-    image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password
+    # MySQLからPostgreSQLに変更
+    image: postgres:16
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      # Postgres用の環境変数
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
     ports:
-      - "3306:3306"
+      - "5433:5432"
     volumes:
-      - db-data:/var/lib/mysql
+      # 保存先ディレクトリもPostgres用に修正
+      - db-data:/var/lib/postgresql/data
 
   web:
     build: .
@@ -21,7 +24,10 @@ services:
       - bundle_data:/usr/local/bundle:cached
     environment:
       TZ: Asia/Tokyo
+      # database.ymlで参照するパスワード
       DATABASE_PASSWORD: password
+      # Postgresのデフォルトユーザー名を指定（必要に応じて）
+      DATABASE_USER: postgres
       SELENIUM_DRIVER_URL: http://chrome:4444/wd/hub
     ports:
       - "3000:3000"
@@ -30,6 +36,7 @@ services:
       - chrome
 
   chrome:
+    # Apple Silicon(M1/M2/M3)に最適化されたイメージを維持
     image: seleniarm/standalone-chromium:latest
     ports:
       - 4444:4444
