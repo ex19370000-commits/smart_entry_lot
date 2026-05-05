@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: smart_entry_lot
+    env: ruby
+    plan: free # <--- ここを追加！
+    buildCommand: "./bin/render-build.sh"
+    startCommand: "bundle exec puma -C config/puma.rb"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: smart_entry_lot_db
+          property: connectionString
+      - key: RAILS_MASTER_KEY
+        sync: false
+      - key: NODE_VERSION
+        value: 20.x
+
+databases:
+  - name: smart_entry_lot_db
+    databaseName: smart_entry_lot
+    user: smart_entry_user
+    plan: free

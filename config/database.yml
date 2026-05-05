@@ -13,3 +13,8 @@ development:
 test:
   <<: *default
   database: smart_entry_lot_test
+
+production:
+  <<: *default
+  # Renderが発行するデータベース接続URLを環境変数から読み込む設定
+  url: <%= ENV['DATABASE_URL'] %>
