@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: smart_entry_lot # アプリ名（任意）
+    name: smart_entry_lot
     env: ruby
     buildCommand: "./bin/render-build.sh"
     startCommand: "bundle exec puma -C config/puma.rb"
@@ -12,10 +12,10 @@ services:
       - key: RAILS_MASTER_KEY
         sync: false
       - key: NODE_VERSION
-        value: 20.x # Dockerfileの設定に合わせる
+        value: 20.x
 
 databases:
   - name: smart_entry_lot_db
     databaseName: smart_entry_lot
-    user: postgres
-    plan: free # 無料プランを指定
+    user: smart_entry_user
+    plan: free
