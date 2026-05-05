@@ -2,6 +2,7 @@ services:
   - type: web
     name: smart_entry_lot
     env: ruby
+    plan: free # <--- ここを追加！
     buildCommand: "./bin/render-build.sh"
     startCommand: "bundle exec puma -C config/puma.rb"
     envVars:
