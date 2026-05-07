@@ -25,3 +25,12 @@ end
 puts "=== シードデータの作成が完了しました！ ==="
 puts "ユーザー: #{User.count}件"
 puts "店舗: #{Shop.count}件"
+
+User.create!(
+  name: "管理者ユーザー",
+  email: "admin@example.com",
+  password: "password",
+  admin: true # ここで管理者に設定
+)
+
+puts "管理者ユーザーを作成しました！"
