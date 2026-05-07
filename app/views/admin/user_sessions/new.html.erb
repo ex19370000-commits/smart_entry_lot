@@ -1,0 +1,17 @@
+<div class="admin-login-container">
+  <h1>管理者ログイン</h1>
+
+  <%= form_with url: admin_login_path, method: :post, local: true do |f| %>
+    <div>
+      <%= f.label :email, "メールアドレス" %>
+      <%= f.email_field :email %>
+    </div>
+
+    <div>
+      <%= f.label :password, "パスワード" %>
+      <%= f.password_field :password %>
+    </div>
+
+    <%= f.submit "ログイン" %>
+  <% end %>
+</div>
