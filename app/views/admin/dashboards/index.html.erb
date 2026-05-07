@@ -1,0 +1,26 @@
+<div class="admin-container">
+  <aside class="admin-sidebar">
+    <h2>Smart Entry <span>Lot</span></h2>
+    <nav>
+      <ul>
+        <li><i class="fa-solid fa-chart-line"></i> Dashboard</li>
+        <li><i class="fa-solid fa-shop"></i> Shops</li>
+        <li><i class="fa-solid fa-users"></i> Users</li>
+      </ul>
+    </nav>
+  </aside>
+
+  <main class="admin-main">
+    <header class="admin-header">
+      <h1>Admin Dashboard</h1>
+      <div class="user-info">
+        <span><%= current_user.name %>（管理者）</span>
+        <%= link_to "Logout", logout_path, data: { "turbo-method": :delete }, class: "btn-logout" %>
+      </div>
+    </header>
+
+    <div class="admin-content">
+      <p>ここに統計情報や管理メニューが表示されます。</p>
+    </div>
+  </main>
+</div>
