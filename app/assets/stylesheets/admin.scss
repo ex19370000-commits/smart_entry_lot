@@ -339,6 +339,7 @@
 .admin-action-links {
   display: flex;
   gap: 15px;
+  font-size: 18px;
   
   a {
     color: var(--admin-text-muted);
@@ -349,4 +350,28 @@
       color: var(--admin-accent);
     }
   }
+}
+
+/* サムネイル画像のスタイル */
+.admin-table-thumb {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--admin-border);
+  display: block;
+}
+
+/* 画像がない時のプレースホルダー */
+.no-image-placeholder {
+  width: 50px;
+  height: 50px;
+  background-color: var(--admin-bg-dark);
+  color: var(--admin-text-muted);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px dashed var(--admin-border);
 }
