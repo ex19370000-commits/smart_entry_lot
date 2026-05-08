@@ -1,0 +1,23 @@
+<aside class="admin-sidebar">
+  <div class="sidebar-brand">
+    <h2>Smart Entry <span>Lot</span></h2>
+  </div>
+  <nav class="sidebar-nav">
+    <ul>
+      <li class="<%= 'active' if current_page?(admin_dashboard_path) %>">
+        <%= link_to admin_dashboard_path do %>
+          <i class="fa-solid fa-gauge-high"></i> ダッシュボード
+        <% end %>
+      </li>
+      <li>
+        <a href="#"><i class="fa-solid fa-calendar-check"></i> イベント管理</a>
+      </li>
+      <li>
+        <a href="#"><i class="fa-solid fa-shop"></i> 店舗管理</a>
+      </li>
+      <li>
+        <a href="#"><i class="fa-solid fa-users"></i> ユーザー管理</a>
+      </li>
+    </ul>
+  </nav>
+</aside>
