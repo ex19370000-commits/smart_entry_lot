@@ -36,6 +36,9 @@ gem "image_processing", "~> 1.2"
 # --- 認証・認可 ---
 gem "sorcery"
 
+# --- AWS S3接続用 ---
+gem "aws-sdk-s3", require: false
+
 # --- 外部API連携・非同期処理 ---
 gem "line-bot-api" # LINEログイン/通知用
 gem "twilio-ruby"  # SMS認証用
