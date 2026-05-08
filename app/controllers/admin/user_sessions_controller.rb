@@ -6,7 +6,7 @@ class Admin::UserSessionsController < ApplicationController
 
     # ユーザーが存在し、かつ「管理者」である場合のみ許可
     if @user && @user.admin?
-      redirect_to admin_dashboard_path, notice: '管理者としてログインしました'
+      redirect_to admin_dashboard_path, notice: 'ログインしました'
     else
       # 万が一、一般ユーザーがメアド登録されていてログインしようとした場合は弾く
       logout 

@@ -6,6 +6,9 @@ ruby "3.1.4"
 # Rails 7.0系
 gem "rails", "~> 7.0.10"
 
+# Scss
+gem 'sassc-rails'
+
 # データベース: PostgreSQLに変更 [設計の決定事項を反映]
 gem "pg"
 

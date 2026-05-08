@@ -1,0 +1,14 @@
+<header class="admin-header">
+  <div class="header-left">
+    <%# ページタイトルなどを動的に表示する準備 %>
+    <span class="breadcrumb">Admin / Dashboard</span>
+  </div>
+  <div class="header-right">
+    <div class="admin-user-profile">
+      <span><i class="fa-solid fa-user-gear"></i> <%= current_user.name %></span>
+      <%= link_to admin_logout_path, data: { "turbo-method": :delete }, class: "logout-icon" do %>
+        <i class="fa-solid fa-right-from-bracket"></i>
+      <% end %>
+    </div>
+  </div>
+</header>
