@@ -1,0 +1,17 @@
+ja:
+  enums:
+    event:
+      status:
+        draft: "下書き"
+        published: "公開"
+        closed: "終了"
+  activerecord:
+    models:
+      event: "イベント"
+    attributes:
+      event:
+        title: "イベント名"
+        description: "詳細説明"
+        start_at: "開始日時"
+        end_at: "終了日時"
+        status: "公開設定"

@@ -1,0 +1,49 @@
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+  <h1 style="font-size: 24px; font-weight: 700;">イベント一覧</h1>
+  
+  <%= link_to new_admin_event_path, class: "btn-primary" do %>
+  <i class="fa-solid fa-plus"></i>
+  <span>新規イベント作成</span>
+<% end %>
+</div
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>タイトル</th>
+        <th>ステータス</th>
+        <th>開催期間</th>
+        <th>作成日</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @events.each do |event| %>
+        <tr>
+          <td style="font-weight: 600;"><%= event.title %></td>
+          <td>
+            <span class="badge badge-<%= event.status %>">
+              <%= event.status_i18n %>
+            </span>
+          </td>
+          <td style="font-size: 13px; color: var(--admin-text-muted);">
+            <%= l event.start_at, format: :short %> 〜 <br>
+            <%= l event.end_at, format: :short %>
+          </td>
+          <td style="font-size: 13px; color: var(--admin-text-muted);">
+            <%= l event.created_at, format: :short %>
+          </td>
+          <td class="admin-action-links">
+            <%= link_to edit_admin_event_path(event) do %>
+              <i class="fa-solid fa-pen-to-square"></i>
+            <% end %>
+            <%= link_to admin_event_path(event), data: { turbo_method: :delete, turbo_confirm: "本当に削除しますか？" } do %>
+              <i class="fa-solid fa-trash" style="color: #f87171;"></i>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

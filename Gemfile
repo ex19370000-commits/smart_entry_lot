@@ -46,6 +46,10 @@ gem "sidekiq"       # 非同期処理
 gem "rqrcode"       # 応募用QRコード生成用 [追加]
 gem "whenever", require: false # スケジュールタスク管理用 [追加]
 
+# --- その他便利なgem ---
+gem 'rails-i18n' # 日本語化
+gem 'enum_help' # enumの日本語化
+
 group :development, :test do
   # デバッグ
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
