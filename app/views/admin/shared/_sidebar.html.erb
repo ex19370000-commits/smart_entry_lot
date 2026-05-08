@@ -1,17 +1,25 @@
+<%# app/views/admin/shared/_sidebar.html.erb %>
+
 <aside class="admin-sidebar">
   <div class="sidebar-brand">
     <h2>Smart Entry <span>Lot</span></h2>
   </div>
   <nav class="sidebar-nav">
     <ul>
+      <%# ダッシュボード %>
       <li class="<%= 'active' if current_page?(admin_dashboard_path) %>">
         <%= link_to admin_dashboard_path do %>
           <i class="fa-solid fa-gauge-high"></i> ダッシュボード
         <% end %>
       </li>
-      <li>
-        <a href="#"><i class="fa-solid fa-calendar-check"></i> イベント管理</a>
+
+      <%# イベント管理 %>
+      <li class="<%= 'active' if controller_name == 'events' %>">
+        <%= link_to admin_events_path do %>
+          <i class="fa-solid fa-calendar-check"></i> イベント管理
+        <% end %>
       </li>
+
       <li>
         <a href="#"><i class="fa-solid fa-shop"></i> 店舗管理</a>
       </li>
