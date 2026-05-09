@@ -1,0 +1,60 @@
+<%# app/views/admin/events/_form.html.erb %>
+
+<%= form_with model: [:admin, event], local: true do |f| %>
+  <%# エラーメッセージの表示 %>
+  <% if event.errors.any? %>
+    <div class="flash-message flash-alert">
+      <ul style="margin: 0; padding-left: 20px;">
+        <% event.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="form-group">
+    <%= f.label :title %>
+    <%= f.text_field :title, class: "form-control", placeholder: "例：春の感謝祭 大抽選会" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :image, "メイン画像（Active Storage）" %>
+    <% if event.image.attached? %>
+      <div style="margin-bottom: 10px;">
+        <p style="font-size: 0.8rem; color: var(--admin-text-muted);">現在の画像:</p>
+        <%= image_tag event.image.variant(resize_to_limit: [200, 200]), style: "border-radius: 4px; border: 1px solid #444;" %>
+      </div>
+    <% end %>
+    <%= f.file_field :image, class: "form-control", accept: 'image/jpg,image/jpeg,image/png,image/gif' %>
+    <small style="color: var(--admin-text-muted); display: block; margin-top: 5px;">
+      ※jpg, png, gif形式がアップロード可能です
+    </small>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :description %>
+    <%= f.text_area :description, class: "form-control", placeholder: "イベントの詳細や景品情報を入力してください", rows: 5 %>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <%= f.label :start_at %>
+      <%= f.datetime_field :start_at, class: "form-control" %>
+    </div>
+    <div class="form-group">
+      <%= f.label :end_at %>
+      <%= f.datetime_field :end_at, class: "form-control" %>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :status %>
+    <%= f.select :status, Event.statuses_i18n.invert, {}, class: "form-control" %>
+  </div>
+
+  <div class="form-actions">
+    <%# 渡された event が新規か既存かで文字を自動切り替え %>
+    <%= f.submit event.new_record? ? "イベントを作成する" : "イベントを更新する", class: "btn-primary" %>
+    <%= link_to "キャンセル", admin_events_path, class: "btn-secondary" %>
+  </div>
+<% end %>
