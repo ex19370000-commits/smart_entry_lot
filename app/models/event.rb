@@ -3,6 +3,9 @@ class Event < ApplicationRecord
   has_one_attached :image
   # TODO: 応募機能（Entry）のテーブルとカラムが完成したらコメントアウトを外す
   # has_many :entries, dependent: :destroy
+  
+  # 自動でランダムな一意のトークンを生成する設定
+  has_secure_token :public_token
 
   # ステータス管理 (0:下書き, 1:公開, 2:終了)
   enum status: { draft: 0, published: 1, closed: 2 }
@@ -13,4 +16,25 @@ class Event < ApplicationRecord
   validates :start_at, presence: true
   validates :end_at, presence: true
   validates :status, presence: true
+
+  # 本番環境と開発環境でURLのドメインを切り替えるメソッド
+  def public_url
+    if Rails.env.production?
+      "https://smart-entry-lot.onrender.com/events/#{public_token}"
+    else
+      "http://localhost:3000/events/#{public_token}"
+    end
+  end
+
+  # QRコードのSVGデータを生成するメソッド
+  def qr_code_svg
+    qrcode = RQRCode::QRCode.new(public_url)
+    qrcode.as_svg(
+      color: "000",
+      shape_rendering: "crispEdges",
+      module_size: 4,
+      standalone: true,
+      use_path: true
+    )
+  end
 end
