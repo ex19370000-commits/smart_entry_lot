@@ -53,6 +53,9 @@ gem "whenever", require: false # スケジュールタスク管理用 [追加]
 gem 'rails-i18n' # 日本語化
 gem 'enum_help' # enumの日本語化
 
+# QRコード生成
+gem 'rqrcode'
+
 group :development, :test do
   # デバッグ
   gem "debug", platforms: %i[ mri mingw x64_mingw ]
