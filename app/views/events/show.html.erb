@@ -1,3 +1,7 @@
+<%# 1. LIFF SDKの読み込み %>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+<%# 2. 画面の表示部分 %>
 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
   <% if @event.image.attached? %>
     <%= image_tag @event.image, style: "width: 100%; border-radius: 8px; margin-bottom: 20px;" %>
@@ -16,8 +20,66 @@
     <%= simple_format(@event.description) %>
   </div>
 
-  <%# 今後ここにLINEログイン＋SMS認証のエントリーボタンを実装します %>
-  <button style="width: 100%; padding: 15px; background-color: #d1d5db; color: #4b5563; border: none; border-radius: 8px; font-weight: bold; cursor: not-allowed;" disabled>
-    LINEでログインして応募する（準備中）
+  <%# 本番用：ボタンをクリックした時にログイン処理を走らせる %>
+  <button id="line-login-btn" onclick="startLineLogin()" style="width: 100%; padding: 15px; background-color: #06C755; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.3s;">
+    LINEでログインして応募する
   </button>
 </div>
+
+<%# 3. 実行スクリプト（本番用・テスト用ログ削除済み） %>
+<script>
+  function startLineLogin() {
+    const liffId = "<%= ENV['LIFF_ID'] %>";
+    const loginBtn = document.getElementById("line-login-btn");
+
+    // ボタンの連打を防止し、UIを「通信中」に変更
+    loginBtn.disabled = true;
+    loginBtn.innerText = "通信中...";
+    loginBtn.style.opacity = "0.7";
+    
+    if (typeof liff === "undefined") {
+      alert("システムエラー: LINEのシステムが読み込めていません。画面を再読み込みしてください。");
+      resetButton(loginBtn);
+      return;
+    }
+
+    // すでに初期化済みの場合はそのままログイン判定へ
+    if (liff.id) {
+      processLogin();
+      return;
+    }
+
+    // LIFFの初期化
+    liff.init({ liffId: liffId })
+      .then(() => {
+        processLogin();
+      })
+      .catch((err) => {
+        console.error("LIFF初期化エラー:", err);
+        alert("LINE連携に失敗しました。時間をおいて再度お試しください。");
+        resetButton(loginBtn);
+      });
+  }
+
+  function processLogin() {
+    const loginBtn = document.getElementById("line-login-btn");
+
+    if (liff.isLoggedIn()) {
+      // ログイン済みの場合：次のIssueで、ここにユーザー登録や応募画面への遷移処理を書きます
+      loginBtn.style.backgroundColor = "#374151";
+      loginBtn.innerText = "LINE認証完了（次のステップへ）";
+      
+      // 次の機能ができるまでの仮のアラートです
+      alert("LINE認証が完了しました！次のステップ（ユーザー登録・SMS認証）へ進む処理を今後実装します。");
+    } else {
+      // 未ログインの場合はLINEの認証画面へ飛ばす
+      liff.login({ redirectUri: window.location.href });
+    }
+  }
+
+  function resetButton(btn) {
+    btn.disabled = false;
+    btn.innerText = "LINEでログインして応募する";
+    btn.style.opacity = "1";
+  }
+</script>

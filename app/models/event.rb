@@ -22,7 +22,8 @@ class Event < ApplicationRecord
     if Rails.env.production?
       "https://smart-entry-lot.onrender.com/events/#{public_token}"
     else
-      "http://localhost:3000/events/#{public_token}"
+      # 変更箇所：localhost:3000 を ngrokの固定ドメインに書き換え
+      "https://skinless-caterer-gecko.ngrok-free.dev/events/#{public_token}"
     end
   end
 

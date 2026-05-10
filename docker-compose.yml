@@ -17,6 +17,8 @@ services:
     build: .
     command: bundle exec rails s -p 3000 -b '0.0.0.0'
     container_name: smart_entry_lot_container
+    env_file:
+      - .env
     tty: true
     stdin_open: true
     volumes:
