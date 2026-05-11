@@ -49,7 +49,7 @@
           <%# 操作ボタン列 %>
           <td>
             <div class="admin-action-links">
-              <%# 1. 詳細ボタン（QRコード確認用・緑色）を追加 %>
+              <%# 1. 詳細ボタン（QRコード確認用・緑色） %>
               <%= link_to admin_event_path(event), style: "color: #10b981;" do %>
                 <i class="fa-solid fa-eye"></i>
               <% end %>
@@ -59,7 +59,7 @@
                 <i class="fa-solid fa-pen-to-square"></i>
               <% end %>
               
-              <%# 3. 削除ボタン %>
+              <%# 3. 削除ボタン（button_toに変更） %>
               <%= button_to admin_event_path(event), method: :delete, form: { data: { turbo_confirm: "本当に削除しますか？" } }, style: "background: none; border: none; padding: 0; cursor: pointer;" do %>
                 <i class="fa-solid fa-trash" style="color: #f87171;"></i>
               <% end %>

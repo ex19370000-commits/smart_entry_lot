@@ -26,4 +26,7 @@ Rails.application.routes.draw do
   
   # 一般応募者用のルーティング（IDではなく public_token で検索する）
   resources :events, param: :public_token, only: %i[show]
+
+  # LINEユーザー登録用APIのルーティング
+  resources :line_users, only: %i[create]
 end
