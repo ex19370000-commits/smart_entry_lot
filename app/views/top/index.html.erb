@@ -1,1 +1,22 @@
-<h1>Smart Entry Lotへようこそ！</h1>
+<% if params['liff.state'].present? %>
+  <%# LIFF OAuthコールバック：SDKにコードを処理させてからリダイレクト %>
+  <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script>
+    // open redirect対策：自サービスの相対パスのみ許可
+    const rawPath = "<%= j params['liff.state'] %>";
+    const safePath = (rawPath.startsWith('/') && !rawPath.startsWith('//')) ? rawPath : '/';
+
+    liff.init({ liffId: "<%= j ENV['LIFF_ID'] %>" })
+      .then(() => {
+        // LIFF SDK がOAuthコードを処理してトークンをlocalStorageに保存した後、元のページへ移動
+        window.location.replace(safePath);
+      })
+      .catch(err => {
+        console.error("LIFF初期化エラー:", err);
+        window.location.replace('/');
+      });
+  </script>
+  <p style="text-align: center; padding: 40px; color: #666;">認証処理中...</p>
+<% else %>
+  <h1>Smart Entry Lotへようこそ！</h1>
+<% end %>

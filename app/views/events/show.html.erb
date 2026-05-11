@@ -1,7 +1,6 @@
-<%# 1. LIFF SDKの読み込み %>
+<%# LIFF SDKの読み込み %>
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-<%# 2. 画面の表示部分 %>
 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
   <% if @event.image.attached? %>
     <%= image_tag @event.image, style: "width: 100%; border-radius: 8px; margin-bottom: 20px;" %>
@@ -20,66 +19,129 @@
     <%= simple_format(@event.description) %>
   </div>
 
-  <%# 本番用：ボタンをクリックした時にログイン処理を走らせる %>
-  <button id="line-login-btn" onclick="startLineLogin()" style="width: 100%; padding: 15px; background-color: #06C755; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background-color 0.3s;">
-    LINEでログインして応募する
-  </button>
+  <%# ログイン状態によるボタンの切り替え %>
+  <% if current_user && current_user.line_user_id.present? %>
+    <%# プロフィールカード %>
+    <div style="background-color: #f3f4f6; border-radius: 8px; padding: 15px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
+      <% if current_user.picture_url.present? %>
+        <img src="<%= current_user.picture_url %>"
+             alt="プロフィール画像"
+             style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+      <% else %>
+        <div style="width: 48px; height: 48px; border-radius: 50%; background-color: #06C755; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <span style="color: #ffffff; font-weight: bold; font-size: 20px;"><%= current_user.name&.first %></span>
+        </div>
+      <% end %>
+      <div>
+        <p style="margin: 0; font-weight: bold; font-size: 15px;"><%= current_user.name %></p>
+        <p style="margin: 4px 0 0 0; font-size: 12px; color: #06C755;">● LINEでログイン中</p>
+      </div>
+    </div>
+    <button disabled style="width: 100%; padding: 15px; background-color: #4b5563; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: default;">
+      LINE認証完了（次のステップへ）
+    </button>
+  <% else %>
+    <button id="line-login-btn" onclick="startLineLogin()" style="width: 100%; padding: 15px; background-color: #06C755; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+      LINEでログインして応募する
+    </button>
+  <% end %>
 </div>
 
-<%# 3. 実行スクリプト（本番用・テスト用ログ削除済み） %>
 <script>
-  function startLineLogin() {
-    const liffId = "<%= ENV['LIFF_ID'] %>";
-    const loginBtn = document.getElementById("line-login-btn");
+  let liffPromise = null;
+  let registrationStarted = false; // 二重実行防止フラグ
 
-    // ボタンの連打を防止し、UIを「通信中」に変更
+  async function ensureLiffInitialized() {
+    if (liffPromise) return liffPromise;
+    const liffId = "<%= ENV['LIFF_ID'] %>";
+    console.log("LIFF初期化中...");
+    liffPromise = liff.init({ liffId: liffId });
+    return liffPromise;
+  }
+
+  async function initializeOnLoad() {
+    try {
+      await ensureLiffInitialized();
+      console.log("LIFF初期化完了。ログイン状態:", liff.isLoggedIn());
+
+      if (liff.isLoggedIn()) {
+        const loginBtn = document.getElementById("line-login-btn");
+        if (loginBtn) {
+          console.log("ログイン済みのため自動登録を開始します...");
+          processDirectRegistration(loginBtn);
+        }
+      }
+    } catch (err) {
+      console.error("初期化エラー:", err);
+    }
+  }
+
+  async function startLineLogin() {
+    const loginBtn = document.getElementById("line-login-btn");
     loginBtn.disabled = true;
     loginBtn.innerText = "通信中...";
-    loginBtn.style.opacity = "0.7";
-    
-    if (typeof liff === "undefined") {
-      alert("システムエラー: LINEのシステムが読み込めていません。画面を再読み込みしてください。");
-      resetButton(loginBtn);
-      return;
-    }
 
-    // すでに初期化済みの場合はそのままログイン判定へ
-    if (liff.id) {
-      processLogin();
-      return;
+    try {
+      await ensureLiffInitialized();
+      if (liff.isLoggedIn()) {
+        processDirectRegistration(loginBtn);
+      } else {
+        const cleanUrl = window.location.origin + window.location.pathname;
+        console.log("LINEログイン画面へ遷移します。戻り先:", cleanUrl);
+        liff.login({ redirectUri: cleanUrl });
+      }
+    } catch (err) {
+      console.error(err);
+      loginBtn.disabled = false;
+      loginBtn.innerText = "LINEでログインして応募する";
     }
+  }
 
-    // LIFFの初期化
-    liff.init({ liffId: liffId })
-      .then(() => {
-        processLogin();
-      })
-      .catch((err) => {
-        console.error("LIFF初期化エラー:", err);
-        alert("LINE連携に失敗しました。時間をおいて再度お試しください。");
-        resetButton(loginBtn);
+  async function processDirectRegistration(loginBtn) {
+    if (registrationStarted) return; // 二重実行をブロック
+    registrationStarted = true;
+
+    loginBtn.innerText = "ユーザー情報を登録中...";
+    loginBtn.disabled = true;
+
+    try {
+      // サーバー側検証用にアクセストークンを取得（line_user_id はサーバーが検証済みトークンから取得する）
+      const [accessToken, profile] = await Promise.all([
+        liff.getAccessToken(),
+        liff.getProfile()
+      ]);
+      console.log("プロフィール取得成功:", profile.displayName);
+
+      const response = await fetch('/line_users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_token: accessToken,
+          name: profile.displayName,
+          picture_url: profile.pictureUrl
+        })
       });
-  }
 
-  function processLogin() {
-    const loginBtn = document.getElementById("line-login-btn");
+      const data = await response.json();
+      console.log("サーバーレスポンス:", data);
 
-    if (liff.isLoggedIn()) {
-      // ログイン済みの場合：次のIssueで、ここにユーザー登録や応募画面への遷移処理を書きます
-      loginBtn.style.backgroundColor = "#374151";
-      loginBtn.innerText = "LINE認証完了（次のステップへ）";
-      
-      // 次の機能ができるまでの仮のアラートです
-      alert("LINE認証が完了しました！次のステップ（ユーザー登録・SMS認証）へ進む処理を今後実装します。");
-    } else {
-      // 未ログインの場合はLINEの認証画面へ飛ばす
-      liff.login({ redirectUri: window.location.href });
+      if (response.ok && data.status === 'success') {
+        console.log("Railsへの登録成功。画面をリロードします。");
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.location.replace(cleanUrl);
+      } else {
+        console.error("Railsへの登録失敗:", data.message);
+        registrationStarted = false;
+        loginBtn.disabled = false;
+        loginBtn.innerText = "LINEでログインして応募する";
+      }
+    } catch (err) {
+      console.error("通信エラー:", err);
+      registrationStarted = false;
+      loginBtn.disabled = false;
+      loginBtn.innerText = "LINEでログインして応募する";
     }
   }
 
-  function resetButton(btn) {
-    btn.disabled = false;
-    btn.innerText = "LINEでログインして応募する";
-    btn.style.opacity = "1";
-  }
+  if (document.readyState !== "loading") { initializeOnLoad(); }
 </script>
