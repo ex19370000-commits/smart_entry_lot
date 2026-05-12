@@ -1,0 +1,47 @@
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+  <h1 style="font-size: 24px; font-weight: 700;">アクセスログ（不正検知）</h1>
+  <span style="font-size: 14px; color: #6b7280;">直近200件を表示</span>
+</div>
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>応募日時</th>
+        <th>イベント</th>
+        <th>ユーザー</th>
+        <th>IPアドレス</th>
+        <th>ユーザーエージェント</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @entries.each do |entry| %>
+        <tr>
+          <td style="white-space: nowrap;"><%= l entry.created_at, format: :short %></td>
+          <td><%= entry.event&.title %></td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <% if entry.user&.picture_url.present? %>
+                <img src="<%= entry.user.picture_url %>" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+              <% end %>
+              <%= entry.user&.name %>
+            </div>
+          </td>
+          <td>
+            <code style="font-size: 12px; background: rgba(255,255,255,0.1); color: #e5e7eb; padding: 2px 6px; border-radius: 4px;">
+              <%= entry.ip_address %>
+            </code>
+          </td>
+          <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #6b7280;" title="<%= entry.user_agent %>">
+            <%= entry.user_agent %>
+          </td>
+        </tr>
+      <% end %>
+      <% if @entries.empty? %>
+        <tr>
+          <td colspan="5" style="text-align: center; color: #9ca3af; padding: 40px;">ログがありません</td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

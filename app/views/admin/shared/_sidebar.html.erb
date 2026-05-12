@@ -20,6 +20,13 @@
         <% end %>
       </li>
 
+      <%# アクセスログ %>
+      <li class="<%= 'active' if controller_name == 'access_logs' %>">
+        <%= link_to admin_access_logs_path do %>
+          <i class="fa-solid fa-shield-halved"></i> アクセスログ
+        <% end %>
+      </li>
+
       <li>
         <a href="#"><i class="fa-solid fa-shop"></i> 店舗管理</a>
       </li>
