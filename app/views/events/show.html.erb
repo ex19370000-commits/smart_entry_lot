@@ -11,8 +11,10 @@
   <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
     <p style="margin: 0; font-size: 14px; color: #4b5563;">受付期間</p>
     <p style="margin: 5px 0 0 0; font-weight: bold;">
-      <%= l @event.start_at, format: :short %> 〜 <%= l @event.end_at, format: :short %>
+      <%= l @event.entry_start_at, format: :short %> 〜 <%= l @event.entry_end_at, format: :short %>
     </p>
+    <p style="margin: 10px 0 0 0; font-size: 14px; color: #4b5563;">当選枠数</p>
+    <p style="margin: 5px 0 0 0; font-weight: bold;"><%= @event.winner_count %> 名</p>
   </div>
 
   <div style="margin-bottom: 30px; line-height: 1.6;">

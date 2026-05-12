@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_05_12_170000) do
+ActiveRecord::Schema[7.0].define(version: 2026_05_12_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -64,12 +64,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_12_170000) do
   create_table "events", force: :cascade do |t|
     t.string "title", null: false
     t.text "description", null: false
-    t.datetime "start_at", null: false
-    t.datetime "end_at", null: false
-    t.integer "status", default: 0, null: false
+    t.datetime "entry_start_at", null: false
+    t.datetime "entry_end_at", null: false
+    t.integer "lottery_status", default: 0, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "public_token"
+    t.integer "winner_count", default: 1, null: false
+    t.bigint "admin_id"
+    t.datetime "lottery_executed_at"
     t.index ["public_token"], name: "index_events_on_public_token", unique: true
   end
 
