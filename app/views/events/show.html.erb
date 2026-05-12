@@ -43,10 +43,19 @@
     </div>
 
     <% if current_user.phone_verified? %>
-      <%# ③ LINE・SMS 両方完了 → 応募ボタン（次タスクで実装予定） %>
-      <button disabled style="width: 100%; padding: 15px; background-color: #4b5563; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: default;">
-        認証完了 ✓（応募機能は準備中です）
-      </button>
+      <%# ③ LINE・SMS 両方完了 → 応募ボタン or 応募済みメッセージ %>
+      <% already_entered = @event.entries.exists?(user: current_user) %>
+      <% if already_entered %>
+        <div style="width: 100%; padding: 15px; background-color: #d1fae5; color: #065f46; border: none; border-radius: 8px; font-weight: bold; text-align: center; box-sizing: border-box;">
+          応募済み ✓ 抽選結果をお待ちください
+        </div>
+      <% else %>
+        <%= form_with url: entries_path, method: :post do |f| %>
+          <%= hidden_field_tag :event_token, @event.public_token %>
+          <%= f.submit "このイベントに応募する",
+                style: "width: 100%; padding: 15px; background-color: #06C755; color: #ffffff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;" %>
+        <% end %>
+      <% end %>
     <% else %>
       <%# ② LINEのみ完了 → SMS認証へ %>
       <%= link_to new_sms_verification_path(event_token: @event.public_token),
