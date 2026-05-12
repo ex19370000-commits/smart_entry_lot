@@ -10,6 +10,16 @@
   </head>
 
   <body>
+    <% if flash[:notice] %>
+      <div style="background-color: #d1fae5; color: #065f46; padding: 12px 20px; text-align: center; font-size: 14px; font-weight: bold;">
+        <%= flash[:notice] %>
+      </div>
+    <% end %>
+    <% if flash[:alert] %>
+      <div style="background-color: #fee2e2; color: #991b1b; padding: 12px 20px; text-align: center; font-size: 14px; font-weight: bold;">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
     <%= yield %>
   </body>
 </html>

@@ -1,8 +1,7 @@
 class Event < ApplicationRecord
   # Active Storageで画像を1枚紐付け
   has_one_attached :image
-  # TODO: 応募機能（Entry）のテーブルとカラムが完成したらコメントアウトを外す
-  # has_many :entries, dependent: :destroy
+  has_many :entries, dependent: :destroy
   
   # 自動でランダムな一意のトークンを生成する設定
   has_secure_token :public_token
