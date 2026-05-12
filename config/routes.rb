@@ -21,7 +21,11 @@ Rails.application.routes.draw do
     get 'dashboard', to: 'dashboards#index'
 
     # イベント管理（resources を使えば index, new, create 等が自動で定義されます）
-    resources :events
+    resources :events do
+      member do
+        post :draw_lottery
+      end
+    end
 
     # アクセスログ（不正検知）
     resources :access_logs, only: %i[index]

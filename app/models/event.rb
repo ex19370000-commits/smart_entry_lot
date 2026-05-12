@@ -27,6 +27,26 @@ class Event < ApplicationRecord
     end
   end
 
+  def already_drawn?
+    lottery_executed_at.present?
+  end
+
+  # winner_count件をランダム選出し、結果を一括更新するトランザクション処理
+  def execute_lottery!
+    raise "既に抽選済みです" if already_drawn?
+
+    all_entries = entries.to_a
+    raise "応募者がいません" if all_entries.empty?
+
+    winner_ids = all_entries.sample(winner_count).map(&:id)
+
+    ActiveRecord::Base.transaction do
+      entries.where(id: winner_ids).update_all(result: Entry.results[:win])
+      entries.where.not(id: winner_ids).update_all(result: Entry.results[:lose])
+      update!(lottery_executed_at: Time.current)
+    end
+  end
+
   # QRコードのSVGデータを生成するメソッド
   def qr_code_svg
     qrcode = RQRCode::QRCode.new(public_url)
