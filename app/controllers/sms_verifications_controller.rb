@@ -55,7 +55,7 @@ class SmsVerificationsController < ApplicationController
   private
 
   def require_line_user
-    unless current_user&.line_user_id.present?
+    unless current_user&.line_uid.present?
       redirect_to root_path, status: :see_other, alert: "LINEログインが必要です"
     end
   end
