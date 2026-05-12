@@ -22,6 +22,9 @@ Rails.application.routes.draw do
 
     # イベント管理（resources を使えば index, new, create 等が自動で定義されます）
     resources :events
+
+    # アクセスログ（不正検知）
+    resources :access_logs, only: %i[index]
   end
   
   # 一般応募者用のルーティング（IDではなく public_token で検索する）

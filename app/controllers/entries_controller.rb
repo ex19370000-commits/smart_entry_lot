@@ -10,7 +10,12 @@ class EntriesController < ApplicationController
       return
     end
 
-    entry = current_user.entries.build(event: @event, cookie_uuid: cookies[:cookie_uuid])
+    entry = current_user.entries.build(
+      event: @event,
+      cookie_uuid: cookies[:cookie_uuid],
+      ip_address: request.remote_ip,
+      user_agent: request.user_agent
+    )
 
     if entry.save
       redirect_to event_path(@event.public_token), status: :see_other, notice: "応募が完了しました！抽選結果をお待ちください。"
