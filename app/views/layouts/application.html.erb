@@ -10,7 +10,7 @@
   </head>
 
   <body>
-    <% if current_user && !current_user.admin? %>
+    <% if current_user %>
       <div style="text-align: right; padding: 8px 20px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
         <%= button_to "ログアウト", logout_path, method: :delete,
               form: { id: "logout-form" },

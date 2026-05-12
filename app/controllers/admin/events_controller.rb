@@ -1,6 +1,5 @@
 class Admin::EventsController < ApplicationController
-  before_action :require_login
-  before_action :require_admin
+  before_action :require_admin_login
   before_action :set_event, only: %i[show edit update destroy draw_lottery]
   layout 'admin'
 

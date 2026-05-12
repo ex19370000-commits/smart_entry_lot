@@ -2,6 +2,7 @@ class User < ApplicationRecord
   authenticates_with_sorcery!
 
   has_many :entries, dependent: :destroy
+  has_one :sms_verification, dependent: :destroy
 
   # LINEログイン(line_uidがある)以外の場合のみ、emailとパスワードを必須にする
   validates :email, presence: true, uniqueness: true, unless: -> { line_uid.present? }

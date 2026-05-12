@@ -35,6 +35,7 @@ gem "image_processing", "~> 1.2"
 
 # --- 認証・認可 ---
 gem "sorcery"
+gem "bcrypt", "~> 3.1.7"
 
 # --- AWS S3接続用 ---
 gem "aws-sdk-s3", require: false

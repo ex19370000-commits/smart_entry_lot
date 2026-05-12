@@ -1,6 +1,5 @@
 class Admin::AccessLogsController < ApplicationController
-  before_action :require_login
-  before_action :require_admin
+  before_action :require_admin_login
 
   layout 'admin'
 
