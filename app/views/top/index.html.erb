@@ -6,13 +6,34 @@
     const rawPath = "<%= j params['liff.state'] %>";
     const safePath = (rawPath.startsWith('/') && !rawPath.startsWith('//')) ? rawPath : '/';
 
+    console.log("★ トップページJS開始");
     liff.init({ liffId: "<%= j ENV['LIFF_ID'] %>" })
-      .then(() => {
-        // LIFF SDK がOAuthコードを処理してトークンをlocalStorageに保存した後、元のページへ移動
+      .then(async () => {
+        const isLoggedIn = liff.isLoggedIn();
+        const accessToken = liff.getAccessToken();
+        console.log("★ liff.init完了 isLoggedIn:", isLoggedIn, "accessToken:", accessToken ? "あり" : "なし");
+        if (accessToken) {
+          try {
+            const profile = await liff.getProfile();
+            console.log("★ プロフィール取得:", profile.displayName);
+            const res = await fetch('/line_users', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                access_token: accessToken,
+                name: profile.displayName,
+                picture_url: profile.pictureUrl
+              })
+            });
+            console.log("★ ユーザー登録レスポンス:", res.status);
+          } catch (e) {
+            console.error("★ ユーザー登録エラー:", e);
+          }
+        }
         window.location.replace(safePath);
       })
       .catch(err => {
-        console.error("LIFF初期化エラー:", err);
+        console.error("★ LIFF初期化エラー:", err);
         window.location.replace('/');
       });
   </script>
