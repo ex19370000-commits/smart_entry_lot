@@ -17,11 +17,13 @@ class SmsVerificationService
     )
   end
 
+  # SmsVerificationレコードを参照して有効性を検証
   def self.valid_code?(user, input_code)
-    return false if user.sms_code.blank?
-    return false if user.sms_code_sent_at < CODE_EXPIRY_MINUTES.minutes.ago
+    record = user.sms_verification
+    return false if record.nil?
+    return false if record.sent_at < CODE_EXPIRY_MINUTES.minutes.ago
     # タイミング攻撃を防ぐため定数時間比較を使用
-    ActiveSupport::SecurityUtils.secure_compare(user.sms_code, input_code.to_s.strip)
+    ActiveSupport::SecurityUtils.secure_compare(record.code, input_code.to_s.strip)
   end
 
   # 国内形式（090-XXXX-XXXX）を E.164 形式（+8190XXXXXXXX）に変換

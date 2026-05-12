@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_05_13_000000) do
+ActiveRecord::Schema[7.0].define(version: 2026_05_13_110000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -40,6 +40,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_13_000000) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "admins", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "password_digest", null: false
+    t.string "display_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_admins_on_email", unique: true
   end
 
   create_table "entries", force: :cascade do |t|
@@ -83,6 +92,15 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_13_000000) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "sms_verifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "code", null: false
+    t.datetime "sent_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_sms_verifications_on_user_id", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", null: false
     t.string "crypted_password"
@@ -90,13 +108,10 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_13_000000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "display_name"
-    t.boolean "admin", default: false, null: false
     t.string "line_uid"
     t.string "picture_url"
     t.string "phone_number"
     t.boolean "phone_verified", default: false, null: false
-    t.string "sms_code"
-    t.datetime "sms_code_sent_at"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["line_uid"], name: "index_users_on_line_uid", unique: true
     t.index ["phone_number"], name: "index_users_on_phone_number", unique: true
@@ -107,4 +122,5 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_13_000000) do
   add_foreign_key "entries", "events"
   add_foreign_key "entries", "shops"
   add_foreign_key "entries", "users"
+  add_foreign_key "sms_verifications", "users"
 end

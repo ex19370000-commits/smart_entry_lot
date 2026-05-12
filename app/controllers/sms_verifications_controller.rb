@@ -18,11 +18,10 @@ class SmsVerificationsController < ApplicationController
 
     begin
       SmsVerificationService.send_code(phone_number, code)
-      current_user.update!(
-        phone_number: phone_number,
-        sms_code: code,
-        sms_code_sent_at: Time.current
-      )
+      current_user.update!(phone_number: phone_number)
+      # 既存レコードがあれば上書き、なければ新規作成
+      current_user.sms_verification&.destroy
+      current_user.create_sms_verification!(code: code, sent_at: Time.current)
       redirect_to verify_sms_verifications_path(event_token: @event_token), status: :see_other
     rescue Twilio::REST::RestError => e
       Rails.logger.error("[Twilio Error] #{e.message}")
@@ -43,7 +42,9 @@ class SmsVerificationsController < ApplicationController
       return render :verify
     end
 
-    current_user.update!(phone_verified: true, sms_code: nil, sms_code_sent_at: nil)
+    # 検証完了後はレコードを削除してphone_verifiedをONにする
+    current_user.sms_verification&.destroy
+    current_user.update!(phone_verified: true)
 
     if @event_token.present?
       redirect_to event_path(@event_token), status: :see_other, notice: "SMS認証が完了しました"

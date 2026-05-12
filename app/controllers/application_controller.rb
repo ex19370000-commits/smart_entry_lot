@@ -14,9 +14,14 @@ class ApplicationController < ActionController::Base
     redirect_to admin_login_path, alert: "ログインしてください"
   end
 
-  def require_admin
-    unless current_user&.admin?
-      redirect_to root_path, alert: "管理者権限が必要です"
+  def current_admin
+    @current_admin ||= Admin.find_by(id: session[:admin_id])
+  end
+  helper_method :current_admin
+
+  def require_admin_login
+    unless current_admin
+      redirect_to admin_login_path, alert: "ログインしてください"
     end
   end
 end
