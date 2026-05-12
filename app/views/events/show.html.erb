@@ -19,9 +19,9 @@
     <%= simple_format(@event.description) %>
   </div>
 
-  <%# ログイン状態によるボタンの切り替え %>
+  <%# ログイン状態によるボタンの切り替え（3段階） %>
   <% if current_user && current_user.line_user_id.present? %>
-    <%# プロフィールカード %>
+    <%# プロフィールカード（LINE・SMS 両認証で共通表示） %>
     <div style="background-color: #f3f4f6; border-radius: 8px; padding: 15px; margin-bottom: 16px; display: flex; align-items: center; gap: 12px;">
       <% if current_user.picture_url.present? %>
         <img src="<%= current_user.picture_url %>"
@@ -34,13 +34,28 @@
       <% end %>
       <div>
         <p style="margin: 0; font-weight: bold; font-size: 15px;"><%= current_user.name %></p>
-        <p style="margin: 4px 0 0 0; font-size: 12px; color: #06C755;">● LINEでログイン中</p>
+        <% if current_user.phone_verified? %>
+          <p style="margin: 4px 0 0 0; font-size: 12px; color: #06C755;">● LINE・SMS認証済み</p>
+        <% else %>
+          <p style="margin: 4px 0 0 0; font-size: 12px; color: #06C755;">● LINEでログイン中</p>
+        <% end %>
       </div>
     </div>
-    <button disabled style="width: 100%; padding: 15px; background-color: #4b5563; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: default;">
-      LINE認証完了（次のステップへ）
-    </button>
+
+    <% if current_user.phone_verified? %>
+      <%# ③ LINE・SMS 両方完了 → 応募ボタン（次タスクで実装予定） %>
+      <button disabled style="width: 100%; padding: 15px; background-color: #4b5563; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: default;">
+        認証完了 ✓（応募機能は準備中です）
+      </button>
+    <% else %>
+      <%# ② LINEのみ完了 → SMS認証へ %>
+      <%= link_to new_sms_verification_path(event_token: @event.public_token),
+            style: "display: block; width: 100%; padding: 15px; background-color: #1d4ed8; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; text-align: center; text-decoration: none; box-sizing: border-box;" do %>
+        SMS認証へ進む →
+      <% end %>
+    <% end %>
   <% else %>
+    <%# ① 未ログイン → LINEログインボタン %>
     <button id="line-login-btn" onclick="startLineLogin()" style="width: 100%; padding: 15px; background-color: #06C755; color: #ffffff; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
       LINEでログインして応募する
     </button>
