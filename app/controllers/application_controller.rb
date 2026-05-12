@@ -9,9 +9,9 @@ class ApplicationController < ActionController::Base
     cookies.permanent[:cookie_uuid] = { value: SecureRandom.uuid, httponly: true }
   end
 
-  # Sorceryのデフォルトメソッドを上書き（未ログイン時の動作）
+  # Sorceryのrequire_loginが失敗した場合（エンドユーザー向けのみ使用）
   def not_authenticated
-    redirect_to admin_login_path, alert: "ログインしてください"
+    redirect_to root_path, alert: 'ログインしてください'
   end
 
   def current_admin
@@ -20,8 +20,8 @@ class ApplicationController < ActionController::Base
   helper_method :current_admin
 
   def require_admin_login
-    unless current_admin
-      redirect_to admin_login_path, alert: "ログインしてください"
-    end
+    return if current_admin
+
+    redirect_to admin_login_path, alert: 'ログインしてください'
   end
 end
