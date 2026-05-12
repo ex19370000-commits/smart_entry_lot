@@ -1,7 +1,10 @@
 ja:
+  time:
+    formats:
+      short: "%Y/%m/%d %H:%M"
   enums:
     event:
-      status:
+      lottery_status:
         draft: "下書き"
         published: "公開"
         closed: "終了"
@@ -12,6 +15,7 @@ ja:
       event:
         title: "イベント名"
         description: "詳細説明"
-        start_at: "開始日時"
-        end_at: "終了日時"
-        status: "公開設定"
+        entry_start_at: "応募開始日時"
+        entry_end_at: "応募締切日時"
+        lottery_status: "公開設定"
+        winner_count: "当選枠数"

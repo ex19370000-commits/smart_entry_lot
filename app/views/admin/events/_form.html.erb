@@ -38,18 +38,23 @@
 
   <div class="form-row">
     <div class="form-group">
-      <%= f.label :start_at %>
-      <%= f.datetime_field :start_at, class: "form-control" %>
+      <%= f.label :entry_start_at, "応募開始日時" %>
+      <%= f.datetime_field :entry_start_at, class: "form-control" %>
     </div>
     <div class="form-group">
-      <%= f.label :end_at %>
-      <%= f.datetime_field :end_at, class: "form-control" %>
+      <%= f.label :entry_end_at, "応募締切日時" %>
+      <%= f.datetime_field :entry_end_at, class: "form-control" %>
     </div>
   </div>
 
   <div class="form-group">
-    <%= f.label :status %>
-    <%= f.select :status, Event.statuses_i18n.invert, {}, class: "form-control" %>
+    <%= f.label :winner_count, "当選枠数" %>
+    <%= f.number_field :winner_count, class: "form-control", min: 1, placeholder: "例：10" %>
+  </div>
+
+  <div class="form-group">
+    <%= f.label :lottery_status, "公開設定" %>
+    <%= f.select :lottery_status, Event.lottery_statuses_i18n.invert, {}, class: "form-control" %>
   </div>
 
   <div class="form-actions">

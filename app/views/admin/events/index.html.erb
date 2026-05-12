@@ -14,6 +14,7 @@
         <th style="width: 80px;">画像</th>
         <th>タイトル</th>
         <th>ステータス</th>
+        <th>当選枠数</th>
         <th>開催期間</th>
         <th>操作</th>
       </tr>
@@ -35,15 +36,18 @@
 
           <%# ステータス列 %>
           <td>
-            <span class="badge badge-<%= event.status %>">
-              <%= event.status_i18n %>
+            <span class="badge badge-<%= event.lottery_status %>">
+              <%= event.lottery_status_i18n %>
             </span>
           </td>
 
+          <%# 当選枠数列 %>
+          <td style="text-align: center;"><%= event.winner_count %> 名</td>
+
           <%# 開催期間列 %>
           <td style="font-size: 13px; color: var(--admin-text-muted);">
-            <%= l event.start_at, format: :short %> 〜 <br>
-            <%= l event.end_at, format: :short %>
+            <%= l event.entry_start_at, format: :short %> 〜 <br>
+            <%= l event.entry_end_at, format: :short %>
           </td>
 
           <%# 操作ボタン列 %>

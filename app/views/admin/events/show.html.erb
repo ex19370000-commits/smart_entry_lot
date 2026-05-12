@@ -1,7 +1,7 @@
 <div class="admin-card" style="max-width: 900px;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
     <h1 class="admin-title" style="margin-bottom: 0;"><%= @event.title %></h1>
-    <span class="badge badge-<%= @event.status %>"><%= @event.status_i18n %></span>
+    <span class="badge badge-<%= @event.lottery_status %>"><%= @event.lottery_status_i18n %></span>
   </div>
 
   <div style="display: flex; gap: 40px; flex-wrap: wrap;">
@@ -12,10 +12,13 @@
       <% end %>
       
       <div style="background-color: var(--admin-bg-dark); padding: 20px; border-radius: 8px; border: 1px solid var(--admin-border);">
-        <h3 style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 10px;">開催期間</h3>
+        <h3 style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 10px;">応募期間</h3>
         <p style="font-size: 16px; margin-bottom: 20px;">
-          <%= l @event.start_at, format: :short %> 〜 <%= l @event.end_at, format: :short %>
+          <%= l @event.entry_start_at, format: :short %> 〜 <%= l @event.entry_end_at, format: :short %>
         </p>
+
+        <h3 style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 10px;">当選枠数</h3>
+        <p style="font-size: 16px; margin-bottom: 20px;"><%= @event.winner_count %> 名</p>
 
         <h3 style="font-size: 14px; color: var(--admin-text-muted); margin-bottom: 10px;">イベント詳細</h3>
         <p style="white-space: pre-wrap; font-size: 15px; line-height: 1.6;"><%= @event.description %></p>
