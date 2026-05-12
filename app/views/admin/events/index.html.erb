@@ -14,7 +14,9 @@
         <th style="width: 80px;">画像</th>
         <th>タイトル</th>
         <th>ステータス</th>
-        <th>当選枠数</th>
+        <th>抽選ステータス</th>
+        <th>応募者数</th>
+        <th>当選者数 / 抽選枠数</th>
         <th>開催期間</th>
         <th>操作</th>
       </tr>
@@ -41,8 +43,36 @@
             </span>
           </td>
 
-          <%# 当選枠数列 %>
-          <td style="text-align: center;"><%= event.winner_count %> 名</td>
+          <%# 抽選ステータス列 %>
+          <td>
+            <% if event.already_drawn? %>
+              <span style="background-color: #052e16; color: #4ade80; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 12px; white-space: nowrap;">
+                <i class="fa-solid fa-circle-check"></i> 抽選済み
+              </span>
+            <% elsif event.closed? %>
+              <span style="background-color: #1f2937; color: #f59e0b; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 12px; white-space: nowrap;">
+                <i class="fa-solid fa-hourglass-half"></i> 未抽選
+              </span>
+            <% else %>
+              <span style="color: #6b7280; font-size: 12px;">—</span>
+            <% end %>
+          </td>
+
+          <%# 応募者数列 %>
+          <td style="text-align: center; font-size: 14px; color: var(--admin-text);">
+            <%= event.entries.count %> 名
+          </td>
+
+          <%# 当選者数 / 抽選枠数列 %>
+          <td style="font-size: 14px; white-space: nowrap; text-align: center;">
+            <% if event.already_drawn? %>
+              <span style="color: var(--admin-text); font-weight: 600;"><%= event.entries.win.count %> 名</span>
+              <span style="color: #6b7280;"> / </span>
+              <span style="color: var(--admin-text-muted);"><%= event.winner_count %> 名</span>
+            <% else %>
+              <span style="color: #6b7280;">— / <%= event.winner_count %> 名</span>
+            <% end %>
+          </td>
 
           <%# 開催期間列 %>
           <td style="font-size: 13px; color: var(--admin-text-muted);">

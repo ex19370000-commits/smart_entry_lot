@@ -1,7 +1,7 @@
 class Admin::EventsController < ApplicationController
   before_action :require_login
   before_action :require_admin
-  before_action :set_event, only: %i[show edit update destroy]
+  before_action :set_event, only: %i[show edit update destroy draw_lottery]
   layout 'admin'
 
   def index
@@ -38,6 +38,13 @@ class Admin::EventsController < ApplicationController
   def destroy
     @event.destroy!
     redirect_to admin_events_path, notice: "イベントを削除しました", status: :see_other
+  end
+
+  def draw_lottery
+    @event.execute_lottery!
+    redirect_to admin_event_path(@event), notice: "抽選を実行しました。当選者 #{@event.winner_count} 名が選出されました。", status: :see_other
+  rescue RuntimeError => e
+    redirect_to admin_event_path(@event), alert: e.message, status: :see_other
   end 
 
   private
