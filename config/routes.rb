@@ -29,4 +29,12 @@ Rails.application.routes.draw do
 
   # LINEユーザー登録用APIのルーティング
   resources :line_users, only: %i[create]
+
+  # SMS認証
+  resources :sms_verifications, only: %i[new create] do
+    collection do
+      get  :verify
+      post :confirm
+    end
+  end
 end

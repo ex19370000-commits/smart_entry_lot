@@ -6,4 +6,6 @@ class User < ApplicationRecord
   validates :password, length: { minimum: 3 }, if: -> { new_record? && line_user_id.blank? }
   validates :password, confirmation: true, if: -> { new_record? && line_user_id.blank? }
   validates :password_confirmation, presence: true, if: -> { new_record? && line_user_id.blank? }
+
+  validates :phone_number, uniqueness: true, allow_nil: true
 end
