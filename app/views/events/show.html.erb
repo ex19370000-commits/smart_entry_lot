@@ -88,10 +88,11 @@
       await ensureLiffInitialized();
       console.log("LIFF初期化完了。ログイン状態:", liff.isLoggedIn());
 
+      // LIFFはログイン済みだがRailsセッションがない場合（トークンがまだ有効な場合のフォールバック）
       if (liff.isLoggedIn()) {
         const loginBtn = document.getElementById("line-login-btn");
         if (loginBtn) {
-          console.log("ログイン済みのため自動登録を開始します...");
+          console.log("LIFFログイン済み・Railsセッションなし。登録を試みます...");
           processDirectRegistration(loginBtn);
         }
       }
@@ -153,6 +154,12 @@
         console.log("Railsへの登録成功。画面をリロードします。");
         const cleanUrl = window.location.origin + window.location.pathname;
         window.location.replace(cleanUrl);
+      } else if (response.status === 401) {
+        // トークン期限切れ → liff.logout()は呼ばずにそのままliff.login()で再認証
+        // logout()を挟むとLIFFセッションが壊れてgetAccessToken()がnullになる
+        console.warn("トークン無効。LIFFから再ログインします。");
+        const cleanUrl = window.location.origin + window.location.pathname;
+        liff.login({ redirectUri: cleanUrl });
       } else {
         console.error("Railsへの登録失敗:", data.message);
         registrationStarted = false;

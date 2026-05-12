@@ -23,7 +23,7 @@ class SmsVerificationsController < ApplicationController
         sms_code: code,
         sms_code_sent_at: Time.current
       )
-      redirect_to verify_sms_verifications_path(event_token: @event_token)
+      redirect_to verify_sms_verifications_path(event_token: @event_token), status: :see_other
     rescue Twilio::REST::RestError => e
       Rails.logger.error("[Twilio Error] #{e.message}")
       flash.now[:alert] = "SMS送信に失敗しました。電話番号をご確認ください。"
@@ -46,9 +46,9 @@ class SmsVerificationsController < ApplicationController
     current_user.update!(phone_verified: true, sms_code: nil, sms_code_sent_at: nil)
 
     if @event_token.present?
-      redirect_to event_path(@event_token), notice: "SMS認証が完了しました"
+      redirect_to event_path(@event_token), status: :see_other, notice: "SMS認証が完了しました"
     else
-      redirect_to root_path, notice: "SMS認証が完了しました"
+      redirect_to root_path, status: :see_other, notice: "SMS認証が完了しました"
     end
   end
 
@@ -56,7 +56,7 @@ class SmsVerificationsController < ApplicationController
 
   def require_line_user
     unless current_user&.line_user_id.present?
-      redirect_to root_path, alert: "LINEログインが必要です"
+      redirect_to root_path, status: :see_other, alert: "LINEログインが必要です"
     end
   end
 end

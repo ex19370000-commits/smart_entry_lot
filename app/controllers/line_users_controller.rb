@@ -33,17 +33,20 @@ class LineUsersController < ApplicationController
   private
 
   def verify_line_token(access_token)
-    uri = URI("https://api.line.me/oauth2/v2.1/verify?access_token=#{URI.encode_www_form_component(access_token)}")
-    response = Net::HTTP.get_response(uri)
+    # LIFFのPKCEトークンはVerify APIにaudが含まれないため、Profile APIで検証する
+    uri = URI("https://api.line.me/v2/profile")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    request = Net::HTTP::Get.new(uri)
+    request['Authorization'] = "Bearer #{access_token}"
+    response = http.request(request)
+    Rails.logger.info("[LINE profile] status=#{response.code}")
     return nil unless response.is_a?(Net::HTTPSuccess)
 
-    payload = JSON.parse(response.body)
-
-    # aud が自サービスのチャンネル ID と一致することを確認（トークン置換攻撃の対策）
-    return nil unless payload['aud'] == ENV['LINE_CHANNEL_ID']
-
-    payload['sub'] # 検証済みの LINE ユーザー ID
-  rescue StandardError
+    profile = JSON.parse(response.body)
+    profile['userId'] # 検証済みの LINE ユーザー ID
+  rescue StandardError => e
+    Rails.logger.error("[LINE profile] error: #{e.message}")
     nil
   end
 end

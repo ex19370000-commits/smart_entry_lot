@@ -10,6 +10,14 @@
   </head>
 
   <body>
+    <% if current_user && !current_user.admin? %>
+      <div style="text-align: right; padding: 8px 20px; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+        <%= button_to "ログアウト", logout_path, method: :delete,
+              form: { id: "logout-form" },
+              style: "background: none; border: none; color: #6b7280; font-size: 13px; cursor: pointer; text-decoration: underline;",
+              onclick: "if(typeof liff !== 'undefined'){ try{ liff.logout(); }catch(e){} }" %>
+      </div>
+    <% end %>
     <% if flash[:notice] %>
       <div style="background-color: #d1fae5; color: #065f46; padding: 12px 20px; text-align: center; font-size: 14px; font-weight: bold;">
         <%= flash[:notice] %>
