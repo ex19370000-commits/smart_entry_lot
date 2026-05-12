@@ -45,12 +45,31 @@
     </div>
 
     <% if current_user.phone_verified? %>
-      <%# ③ LINE・SMS 両方完了 → 応募ボタン or 応募済みメッセージ %>
-      <% already_entered = @event.entries.exists?(user: current_user) %>
-      <% if already_entered %>
-        <div style="width: 100%; padding: 15px; background-color: #d1fae5; color: #065f46; border: none; border-radius: 8px; font-weight: bold; text-align: center; box-sizing: border-box;">
-          応募済み ✓ 抽選結果をお待ちください
-        </div>
+      <%# ③ LINE・SMS 両方完了 → 応募ボタン or 結果表示 %>
+      <% my_entry = @event.entries.find_by(user: current_user) %>
+      <% if my_entry %>
+        <% if @event.already_drawn? %>
+          <% if my_entry.win? %>
+            <%# 当選 %>
+            <div style="width: 100%; padding: 20px 15px; background-color: #fefce8; border: 2px solid #eab308; border-radius: 8px; text-align: center; box-sizing: border-box;">
+              <p style="margin: 0 0 6px 0; font-size: 24px;">🎉</p>
+              <p style="margin: 0; font-size: 18px; font-weight: bold; color: #713f12;">おめでとうございます！ご当選です！</p>
+              <p style="margin: 8px 0 0 0; font-size: 13px; color: #92400e;">抽選の結果、当選が決定しました。来店時にこの画面をご提示ください。</p>
+            </div>
+          <% else %>
+            <%# 落選 %>
+            <div style="width: 100%; padding: 20px 15px; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 8px; text-align: center; box-sizing: border-box;">
+              <p style="margin: 0 0 6px 0; font-size: 22px;">😔</p>
+              <p style="margin: 0; font-size: 16px; font-weight: bold; color: #374151;">今回は惜しくも落選となりました</p>
+              <p style="margin: 8px 0 0 0; font-size: 13px; color: #6b7280;">厳正なる抽選の結果、落選となりました。またの応募をお待ちしております。</p>
+            </div>
+          <% end %>
+        <% else %>
+          <%# 抽選前 %>
+          <div style="width: 100%; padding: 15px; background-color: #d1fae5; color: #065f46; border: none; border-radius: 8px; font-weight: bold; text-align: center; box-sizing: border-box;">
+            応募済み ✓ 抽選結果をお待ちください
+          </div>
+        <% end %>
       <% else %>
         <%= form_with url: entries_path, method: :post do |f| %>
           <%= hidden_field_tag :event_token, @event.public_token %>
