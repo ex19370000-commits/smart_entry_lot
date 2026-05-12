@@ -24,7 +24,7 @@
               <% if entry.user&.picture_url.present? %>
                 <img src="<%= entry.user.picture_url %>" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
               <% end %>
-              <%= entry.user&.name %>
+              <%= entry.user&.display_name %>
             </div>
           </td>
           <td>

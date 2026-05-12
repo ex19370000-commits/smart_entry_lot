@@ -7,17 +7,17 @@ class LineUsersController < ApplicationController
   def create
     return render json: { status: 'error', message: 'access_token is required' }, status: :bad_request if params[:access_token].blank?
 
-    # LINE サーバーでトークンを検証し、正規の line_user_id を取得
-    line_user_id = verify_line_token(params[:access_token])
-    return render json: { status: 'error', message: 'Invalid LINE access token' }, status: :unauthorized unless line_user_id
+    # LINE サーバーでトークンを検証し、正規の line_uid を取得
+    line_uid = verify_line_token(params[:access_token])
+    return render json: { status: 'error', message: 'Invalid LINE access token' }, status: :unauthorized unless line_uid
 
-    user = User.find_or_initialize_by(line_user_id: line_user_id)
-    user.name = params[:name]
+    user = User.find_or_initialize_by(line_uid: line_uid)
+    user.display_name = params[:name]
     user.picture_url = params[:picture_url]
 
     # Sorcery の email NOT NULL 制約を回避するため新規作成時のみダミー値をセット
     if user.new_record?
-      user.email = "line_#{line_user_id}@example.com"
+      user.email = "line_#{line_uid}@example.com"
       user.password = SecureRandom.hex(10)
       user.password_confirmation = user.password
     end

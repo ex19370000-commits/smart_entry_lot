@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_05_12_190000) do
+ActiveRecord::Schema[7.0].define(version: 2026_05_13_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -89,16 +89,16 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_12_190000) do
     t.string "salt"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name"
+    t.string "display_name"
     t.boolean "admin", default: false, null: false
-    t.string "line_user_id"
+    t.string "line_uid"
     t.string "picture_url"
     t.string "phone_number"
     t.boolean "phone_verified", default: false, null: false
     t.string "sms_code"
     t.datetime "sms_code_sent_at"
     t.index ["email"], name: "index_users_on_email", unique: true
-    t.index ["line_user_id"], name: "index_users_on_line_user_id", unique: true
+    t.index ["line_uid"], name: "index_users_on_line_uid", unique: true
     t.index ["phone_number"], name: "index_users_on_phone_number", unique: true
   end
 
