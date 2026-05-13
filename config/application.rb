@@ -25,7 +25,7 @@ module SmartEntryLot
     config.good_job.enable_cron   = true
     config.good_job.cron = {
       auto_lottery: {
-        cron: '*/5 * * * *',
+        cron: '* * * * *',
         class: 'AutoLotteryJob',
         description: '応募受付終了イベントの自動抽選'
       }
