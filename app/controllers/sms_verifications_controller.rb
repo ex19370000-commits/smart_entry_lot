@@ -15,18 +15,24 @@ class SmsVerificationsController < ApplicationController
     end
 
     code = SmsVerificationService.generate_code
+    current_user.update!(phone_number: phone_number)
+    current_user.sms_verification&.destroy
+    current_user.create_sms_verification!(code: code, sent_at: Time.current)
 
-    begin
-      SmsVerificationService.send_code(phone_number, code)
-      current_user.update!(phone_number: phone_number)
-      # 既存レコードがあれば上書き、なければ新規作成
-      current_user.sms_verification&.destroy
-      current_user.create_sms_verification!(code: code, sent_at: Time.current)
-      redirect_to verify_sms_verifications_path(event_token: @event_token), status: :see_other
-    rescue Twilio::REST::RestError => e
-      Rails.logger.error("[Twilio Error] #{e.message}")
-      flash.now[:alert] = 'SMS送信に失敗しました。電話番号をご確認ください。'
-      render :new
+    if ENV['SMS_MOCK_MODE'] == 'true'
+      # MVPデモ用：SMS未送信でコードを画面表示
+      redirect_to verify_sms_verifications_path(event_token: @event_token),
+                  status: :see_other,
+                  flash: { mock_code: code }
+    else
+      begin
+        SmsVerificationService.send_code(phone_number, code)
+        redirect_to verify_sms_verifications_path(event_token: @event_token), status: :see_other
+      rescue Twilio::REST::RestError => e
+        Rails.logger.error("[Twilio Error] #{e.message}")
+        flash.now[:alert] = 'SMS送信に失敗しました。電話番号をご確認ください。'
+        render :new
+      end
     end
   end
 
