@@ -109,10 +109,14 @@
       await ensureLiffInitialized();
 
       if (!liff.isInClient()) {
-        // 外部ブラウザ（Safari等）：ボタンをLINEアプリで開くに切り替え
+        // 外部ブラウザ（Safari等）：ボタンのonclickをawaitなしの同期リダイレクトに差し替える
+        // iOS Universal Links はユーザー操作と同期したnavigationでないと動作しないため
         const loginBtn = document.getElementById("line-login-btn");
         if (loginBtn) {
           loginBtn.innerText = "LINEアプリで開く";
+          loginBtn.onclick = function() {
+            window.location.href = LIFF_APP_URL;
+          };
         }
         return;
       }
