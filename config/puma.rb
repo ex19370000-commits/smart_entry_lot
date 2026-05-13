@@ -40,12 +40,14 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 # preload_app!
 
 # Pumaクラスターモードでフォークした場合にGood Jobを各ワーカーで再起動する
-on_worker_boot do
-  GoodJob.restart_on_fork
+# on_worker_boot は Puma 8.0 で非推奨のため before_worker_boot を使用
+# defined? チェックで Puma 設定読み込み時の未初期化エラーを防ぐ
+before_worker_boot do
+  GoodJob.restart_on_fork if defined?(GoodJob)
 end
 
-on_worker_shutdown do
-  GoodJob.shutdown
+before_worker_shutdown do
+  GoodJob.shutdown if defined?(GoodJob)
 end
 
 # Allow puma to be restarted by `bin/rails restart` command.
