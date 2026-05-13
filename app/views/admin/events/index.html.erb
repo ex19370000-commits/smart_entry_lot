@@ -60,13 +60,13 @@
 
           <%# 応募者数列 %>
           <td style="text-align: center; font-size: 14px; color: var(--admin-text);">
-            <%= event.entries.count %> 名
+            <%= event.entries.size %> 名
           </td>
 
           <%# 当選者数 / 抽選枠数列 %>
           <td style="font-size: 14px; white-space: nowrap; text-align: center;">
             <% if event.already_drawn? %>
-              <span style="color: var(--admin-text); font-weight: 600;"><%= event.entries.win.count %> 名</span>
+              <span style="color: var(--admin-text); font-weight: 600;"><%= event.entries.count(&:win?) %> 名</span>
               <span style="color: #6b7280;"> / </span>
               <span style="color: var(--admin-text-muted);"><%= event.winner_count %> 名</span>
             <% else %>

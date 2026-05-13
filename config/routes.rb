@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # ヘルスチェック（Render.com のスリープ対策 ping 先）
+  get 'health', to: proc { [200, {}, ['ok']] }
+
   # トップページ
   root 'top#index'
 
