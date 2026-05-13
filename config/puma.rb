@@ -44,5 +44,9 @@ on_worker_boot do
   GoodJob.restart_on_fork
 end
 
+on_worker_shutdown do
+  GoodJob.shutdown
+end
+
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
