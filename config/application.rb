@@ -18,5 +18,17 @@ module SmartEntryLot
     # --- ここまで追記 ---
 
     # config.eager_load_paths << Rails.root.join("extras")
+
+    config.active_job.queue_adapter = :good_job
+    # cronスケジューラを有効化（デフォルト無効のため明示が必要）
+    config.good_job.execution_mode = :async_server
+    config.good_job.enable_cron   = true
+    config.good_job.cron = {
+      auto_lottery: {
+        cron: '* * * * *',
+        class: 'AutoLotteryJob',
+        description: '応募受付終了イベントの自動抽選'
+      }
+    }
   end
 end

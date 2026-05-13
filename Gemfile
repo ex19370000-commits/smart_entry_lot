@@ -43,19 +43,14 @@ gem "aws-sdk-s3", require: false
 # --- 外部API連携・非同期処理 ---
 gem "line-bot-api" # LINEログイン/通知用
 gem "twilio-ruby"  # SMS認証用
-gem "redis", "~> 4.0" # Sidekiqのバックエンド
-gem "sidekiq"       # 非同期処理
+gem "good_job"      # DB（PostgreSQL）ベースの非同期・定期実行
 
 # --- MVP機能・ツール ---
-gem "rqrcode"       # 応募用QRコード生成用 [追加]
-gem "whenever", require: false # スケジュールタスク管理用 [追加]
+gem "rqrcode"       # 応募用QRコード生成用
 
 # --- その他便利なgem ---
 gem 'rails-i18n' # 日本語化
 gem 'enum_help' # enumの日本語化
-
-# QRコード生成
-gem 'rqrcode'
 
 group :development, :test do
   # デバッグ
