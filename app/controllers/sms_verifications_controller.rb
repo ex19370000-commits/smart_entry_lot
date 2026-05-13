@@ -59,6 +59,15 @@ class SmsVerificationsController < ApplicationController
     end
   end
 
+  def reset_for_demo
+    return redirect_to root_path unless ENV['SMS_MOCK_MODE'] == 'true'
+
+    current_user.sms_verification&.destroy
+    current_user.update!(phone_verified: false, phone_number: nil)
+    event_token = params[:event_token]
+    redirect_to new_sms_verification_path(event_token: event_token), status: :see_other, notice: 'SMS認証をリセットしました'
+  end
+
   private
 
   def require_line_user

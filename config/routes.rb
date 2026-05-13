@@ -51,6 +51,7 @@ Rails.application.routes.draw do
     collection do
       get  :verify
       post :confirm
+      post :reset_for_demo
     end
   end
 end

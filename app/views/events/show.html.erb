@@ -44,6 +44,15 @@
       </div>
     </div>
 
+    <% if ENV['SMS_MOCK_MODE'] == 'true' && current_user.phone_verified? %>
+      <%= button_to reset_for_demo_sms_verifications_path,
+            method: :post,
+            params: { event_token: @event.public_token },
+            style: "background: none; border: none; padding: 0; margin-bottom: 8px; cursor: pointer;" do %>
+        <span style="font-size: 11px; color: #9ca3af; text-decoration: underline;">【デモ用】SMS認証をリセットする</span>
+      <% end %>
+    <% end %>
+
     <% if current_user.phone_verified? %>
       <%# ③ LINE・SMS 両方完了 → 応募ボタン or 結果表示 %>
       <% my_entry = @event.entries.find_by(user: current_user) %>
