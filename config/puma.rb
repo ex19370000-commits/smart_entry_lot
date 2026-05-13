@@ -24,31 +24,9 @@ environment ENV.fetch("RAILS_ENV") { "development" }
 # Specifies the `pidfile` that Puma will use.
 pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 
-# Specifies the number of `workers` to boot in clustered mode.
-# Workers are forked web server processes. If using threads and workers together
-# the concurrency of the application would be max `threads` * `workers`.
-# Workers do not work on JRuby or Windows (both of which do not support
-# processes).
-#
-# workers ENV.fetch("WEB_CONCURRENCY") { 2 }
-
-# Use the `preload_app!` method when specifying a `workers` number.
-# This directive tells Puma to first boot the application and load code
-# before forking the application. This takes advantage of Copy On Write
-# process behavior so workers use less memory.
-#
-# preload_app!
-
-# Pumaクラスターモードでフォークした場合にGood Jobを各ワーカーで再起動する
-# on_worker_boot は Puma 8.0 で非推奨のため before_worker_boot を使用
-# defined? チェックで Puma 設定読み込み時の未初期化エラーを防ぐ
-before_worker_boot do
-  GoodJob.restart_on_fork if defined?(GoodJob)
-end
-
-before_worker_shutdown do
-  GoodJob.shutdown if defined?(GoodJob)
-end
+# Renderフリープランは WEB_CONCURRENCY=1 を自動設定するが、
+# Good Job async モードはシングルプロセスで動作するため workers=0 を明示する
+workers 0
 
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
