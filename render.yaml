@@ -14,6 +14,16 @@ services:
         sync: false
       - key: NODE_VERSION
         value: 20.x
+      # LINE LIFF
+      - key: LIFF_ID
+        sync: false
+      # Twilio SMS認証
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        sync: false
 
 databases:
   - name: smart_entry_lot_db

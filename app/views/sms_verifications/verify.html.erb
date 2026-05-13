@@ -8,6 +8,13 @@
     </p>
   </div>
 
+  <% if flash[:mock_code] %>
+    <div style="background-color: #fef3c7; border: 2px dashed #f59e0b; padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+      <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: bold; color: #92400e;">【MVPデモ】SMS未送信モード</p>
+      <p style="margin: 0; font-size: 28px; font-weight: bold; letter-spacing: 10px; color: #78350f;"><%= flash[:mock_code] %></p>
+    </div>
+  <% end %>
+
   <% if flash[:alert] %>
     <div style="background-color: #fee2e2; color: #991b1b; padding: 12px 15px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;">
       <%= flash[:alert] %>

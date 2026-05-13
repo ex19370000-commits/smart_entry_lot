@@ -4,7 +4,7 @@ class Admin::EventsController < ApplicationController
   layout 'admin'
 
   def index
-    @events = Event.all.order(created_at: :desc)
+    @events = Event.includes(:entries).order(created_at: :desc)
   end
 
   def show

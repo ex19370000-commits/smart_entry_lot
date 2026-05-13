@@ -44,6 +44,15 @@
       </div>
     </div>
 
+    <% if ENV['SMS_MOCK_MODE'] == 'true' && current_user.phone_verified? %>
+      <%= button_to reset_for_demo_sms_verifications_path,
+            method: :post,
+            params: { event_token: @event.public_token },
+            style: "background: none; border: none; padding: 0; margin-bottom: 8px; cursor: pointer;" do %>
+        <span style="font-size: 11px; color: #9ca3af; text-decoration: underline;">【デモ用】SMS認証をリセットする</span>
+      <% end %>
+    <% end %>
+
     <% if current_user.phone_verified? %>
       <%# ③ LINE・SMS 両方完了 → 応募ボタン or 結果表示 %>
       <% my_entry = @event.entries.find_by(user: current_user) %>
@@ -93,32 +102,43 @@
 </div>
 
 <script>
+  const LIFF_APP_URL = "https://liff.line.me/<%= ENV['LIFF_ID'] %>/events/<%= @event.public_token %>";
+
   let liffPromise = null;
   let registrationStarted = false; // 二重実行防止フラグ
 
   async function ensureLiffInitialized() {
     if (liffPromise) return liffPromise;
-    const liffId = "<%= ENV['LIFF_ID'] %>";
-    console.log("LIFF初期化中...");
-    liffPromise = liff.init({ liffId: liffId });
+    liffPromise = liff.init({ liffId: "<%= ENV['LIFF_ID'] %>" });
     return liffPromise;
   }
 
   async function initializeOnLoad() {
     try {
       await ensureLiffInitialized();
-      console.log("LIFF初期化完了。ログイン状態:", liff.isLoggedIn());
 
-      // LIFFはログイン済みだがRailsセッションがない場合（トークンがまだ有効な場合のフォールバック）
+      if (!liff.isInClient()) {
+        // 外部ブラウザ（Safari等）：ボタンのonclickをawaitなしの同期リダイレクトに差し替える
+        // iOS Universal Links はユーザー操作と同期したnavigationでないと動作しないため
+        const loginBtn = document.getElementById("line-login-btn");
+        if (loginBtn) {
+          loginBtn.innerText = "LINEアプリで開く";
+          loginBtn.onclick = function() {
+            window.location.href = LIFF_APP_URL;
+          };
+        }
+        return;
+      }
+
+      // LINE内ブラウザ：ログイン済みならそのまま登録処理へ
       if (liff.isLoggedIn()) {
         const loginBtn = document.getElementById("line-login-btn");
         if (loginBtn) {
-          console.log("LIFFログイン済み・Railsセッションなし。登録を試みます...");
           processDirectRegistration(loginBtn);
         }
       }
     } catch (err) {
-      console.error("初期化エラー:", err);
+      console.error("LIFF初期化エラー:", err);
     }
   }
 
@@ -129,12 +149,18 @@
 
     try {
       await ensureLiffInitialized();
+
+      if (!liff.isInClient()) {
+        // 外部ブラウザ → LINEアプリ内でこのページを開き直す
+        window.location.href = LIFF_APP_URL;
+        return;
+      }
+
       if (liff.isLoggedIn()) {
         processDirectRegistration(loginBtn);
       } else {
-        const cleanUrl = window.location.origin + window.location.pathname;
-        console.log("LINEログイン画面へ遷移します。戻り先:", cleanUrl);
-        liff.login({ redirectUri: cleanUrl });
+        // LINE内ブラウザで未ログインの場合（通常は起きない）
+        liff.login({ redirectUri: window.location.origin + window.location.pathname });
       }
     } catch (err) {
       console.error(err);
@@ -151,12 +177,10 @@
     loginBtn.disabled = true;
 
     try {
-      // サーバー側検証用にアクセストークンを取得（line_user_id はサーバーが検証済みトークンから取得する）
       const [accessToken, profile] = await Promise.all([
         liff.getAccessToken(),
         liff.getProfile()
       ]);
-      console.log("プロフィール取得成功:", profile.displayName);
 
       const response = await fetch('/line_users', {
         method: 'POST',
@@ -169,20 +193,15 @@
       });
 
       const data = await response.json();
-      console.log("サーバーレスポンス:", data);
 
       if (response.ok && data.status === 'success') {
-        console.log("Railsへの登録成功。画面をリロードします。");
-        const cleanUrl = window.location.origin + window.location.pathname;
-        window.location.replace(cleanUrl);
+        window.location.replace(window.location.origin + window.location.pathname);
       } else if (response.status === 401) {
-        // トークン期限切れ → liff.logout()は呼ばずにそのままliff.login()で再認証
+        // トークン期限切れ → logout()を挟まずそのまま再認証
         // logout()を挟むとLIFFセッションが壊れてgetAccessToken()がnullになる
-        console.warn("トークン無効。LIFFから再ログインします。");
-        const cleanUrl = window.location.origin + window.location.pathname;
-        liff.login({ redirectUri: cleanUrl });
+        liff.login({ redirectUri: window.location.origin + window.location.pathname });
       } else {
-        console.error("Railsへの登録失敗:", data.message);
+        console.error("登録失敗:", data.message);
         registrationStarted = false;
         loginBtn.disabled = false;
         loginBtn.innerText = "LINEでログインして応募する";
