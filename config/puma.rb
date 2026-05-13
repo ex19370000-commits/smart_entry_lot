@@ -39,5 +39,10 @@ pidfile ENV.fetch("PIDFILE") { "tmp/pids/server.pid" }
 #
 # preload_app!
 
+# Pumaクラスターモードでフォークした場合にGood Jobを各ワーカーで再起動する
+on_worker_boot do
+  GoodJob.restart_on_fork
+end
+
 # Allow puma to be restarted by `bin/rails restart` command.
 plugin :tmp_restart
