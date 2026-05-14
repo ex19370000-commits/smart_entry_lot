@@ -29,5 +29,10 @@
       </div>
     <% end %>
     <%= yield %>
+    <footer style="margin-top: 60px; padding: 24px 20px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 13px; color: #9ca3af;">
+      <%= link_to "プライバシーポリシー", privacy_policy_path, style: "color: #6b7280; text-decoration: none; margin: 0 12px;" %>
+      <%= link_to "利用規約", terms_path, style: "color: #6b7280; text-decoration: none; margin: 0 12px;" %>
+      <p style="margin: 12px 0 0;">&copy; <%= Time.current.year %> Smart Entry Lot</p>
+    </footer>
   </body>
 </html>
