@@ -5,7 +5,7 @@
   <div class="header-right">
     <div class="admin-user-profile">
       <span><i class="fa-solid fa-user-gear"></i> <%= current_admin.display_name %></span>
-      <%= link_to admin_logout_path, data: { "turbo-method": :delete }, class: "logout-icon" do %>
+      <%= button_to admin_logout_path, method: :delete, class: "logout-icon" do %>
         <i class="fa-solid fa-right-from-bracket"></i>
       <% end %>
     </div>
