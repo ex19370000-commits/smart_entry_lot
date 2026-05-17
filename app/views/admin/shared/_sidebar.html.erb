@@ -27,12 +27,21 @@
         <% end %>
       </li>
 
-      <li>
-        <a href="#"><i class="fa-solid fa-shop"></i> 店舗管理</a>
-      </li>
-      <li>
-        <a href="#"><i class="fa-solid fa-users"></i> ユーザー管理</a>
-      </li>
+      <% if current_admin.role_owner? %>
+        <li class="<%= 'active' if controller_name == 'admins' %>">
+          <%= link_to admin_admins_path do %>
+            <i class="fa-solid fa-shop"></i> 店舗管理
+          <% end %>
+        </li>
+        <li class="<%= 'active' if controller_name == 'admins' && action_name == 'new' %>">
+          <%= link_to new_admin_admin_path do %>
+            <i class="fa-solid fa-user-plus"></i> アカウント発行
+          <% end %>
+        </li>
+        <li>
+          <a href="#"><i class="fa-solid fa-users"></i> ユーザー管理</a>
+        </li>
+      <% end %>
     </ul>
   </nav>
 </aside>

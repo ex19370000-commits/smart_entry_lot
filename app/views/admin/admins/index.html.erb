@@ -1,0 +1,53 @@
+<% content_for :breadcrumb, '管理画面 / 店舗管理' %>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+  <h1 style="font-size: 24px; font-weight: 700;">店舗管理</h1>
+  <%= link_to new_admin_admin_path, class: "btn-primary" do %>
+    <i class="fa-solid fa-user-plus"></i>
+    <span>店舗アカウント発行</span>
+  <% end %>
+</div>
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>表示名</th>
+        <th>メールアドレス</th>
+        <th>イベント数</th>
+        <th>登録日</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if @store_admins.any? %>
+        <% @store_admins.each do |admin| %>
+          <tr>
+            <td style="font-weight: 600;"><%= admin.display_name %></td>
+            <td style="color: var(--admin-text-muted);"><%= admin.email %></td>
+            <td style="font-size: 13px;">
+              <span style="color: #4ade80;">公開 <%= admin.events.published.count %> 件</span>
+              <span style="color: var(--admin-text-muted); margin: 0 4px;">/</span>
+              <span style="color: #f87171;">終了 <%= admin.events.closed.count %> 件</span>
+            </td>
+            <td style="font-size: 13px; color: var(--admin-text-muted);"><%= l admin.created_at, format: :short %></td>
+            <td>
+              <div class="admin-action-links">
+                <%= button_to admin_admin_path(admin), method: :delete,
+                      form: { onsubmit: "return confirm('「#{admin.display_name}」を削除しますか？')" },
+                      style: "background: none; border: none; padding: 0; cursor: pointer;" do %>
+                  <i class="fa-solid fa-trash" style="color: #f87171;"></i>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr>
+          <td colspan="5" style="text-align: center; color: var(--admin-text-muted); padding: 40px;">
+            店舗アカウントはまだありません
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

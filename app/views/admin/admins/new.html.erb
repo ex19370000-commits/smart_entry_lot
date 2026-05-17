@@ -1,0 +1,46 @@
+<% content_for :breadcrumb, '管理画面 / アカウント発行' %>
+<div class="admin-card">
+  <h1 class="admin-title">アカウント発行</h1>
+
+  <%= form_with model: [:admin, @admin], local: true do |f| %>
+    <% if @admin.errors.any? %>
+      <div class="flash-message flash-alert">
+        <ul style="margin: 0; padding-left: 20px;">
+          <% @admin.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="form-group">
+      <%= f.label :role, "権限" %>
+      <%= f.select :role, [["管理者（オーナー）", "owner"], ["店舗スタッフ", "store"]], { selected: "store" }, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :display_name, "表示名" %>
+      <%= f.text_field :display_name, class: "form-control", placeholder: "例：渋谷店" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :email, "メールアドレス" %>
+      <%= f.email_field :email, class: "form-control", placeholder: "例：shibuya@example.com" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :password, "パスワード" %>
+      <%= f.password_field :password, class: "form-control" %>
+    </div>
+
+    <div class="form-group">
+      <%= f.label :password_confirmation, "パスワード（確認）" %>
+      <%= f.password_field :password_confirmation, class: "form-control" %>
+    </div>
+
+    <div class="form-actions">
+      <%= f.submit "アカウントを発行する", class: "btn-primary" %>
+      <%= link_to "キャンセル", admin_events_path, class: "btn-secondary" %>
+    </div>
+  <% end %>
+</div>

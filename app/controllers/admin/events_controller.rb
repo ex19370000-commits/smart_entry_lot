@@ -4,7 +4,11 @@ class Admin::EventsController < ApplicationController
   layout 'admin'
 
   def index
-    @events = Event.includes(:entries).order(created_at: :desc)
+    @events = if current_admin.role_store?
+                current_admin.events.includes(:entries).order(created_at: :desc)
+              else
+                Event.includes(:entries, :admin).order(created_at: :desc)
+              end
   end
 
   def show
@@ -16,6 +20,7 @@ class Admin::EventsController < ApplicationController
 
   def create
     @event = Event.new(event_params)
+    @event.admin_id = current_admin.id
     if @event.save
       redirect_to admin_events_path, notice: 'イベントを作成しました'
     else
@@ -49,7 +54,13 @@ class Admin::EventsController < ApplicationController
   private
 
   def set_event
-    @event = Event.find(params[:id])
+    @event = if current_admin.role_store?
+               current_admin.events.find(params[:id])
+             else
+               Event.find(params[:id])
+             end
+  rescue ActiveRecord::RecordNotFound
+    redirect_to admin_events_path, alert: '権限がないか、イベントが存在しません'
   end
 
   def event_params

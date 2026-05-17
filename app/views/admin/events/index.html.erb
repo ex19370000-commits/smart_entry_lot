@@ -19,6 +19,9 @@
         <th>応募者数</th>
         <th>当選者数 / 抽選枠数</th>
         <th>開催期間</th>
+        <% if current_admin.role_owner? %>
+          <th>店舗名</th>
+        <% end %>
         <th>操作</th>
       </tr>
     </thead>
@@ -81,6 +84,13 @@
             <%= l event.entry_end_at, format: :short %>
           </td>
 
+          <%# 担当管理者列（owner のみ表示） %>
+          <% if current_admin.role_owner? %>
+            <td style="font-size: 13px; color: var(--admin-text-muted);">
+              <%= event.admin&.display_name || "—" %>
+            </td>
+          <% end %>
+
           <%# 操作ボタン列 %>
           <td>
             <div class="admin-action-links">
@@ -95,7 +105,7 @@
               <% end %>
               
               <%# 3. 削除ボタン（button_toに変更） %>
-              <%= button_to admin_event_path(event), method: :delete, form: { data: { turbo_confirm: "本当に削除しますか？" } }, style: "background: none; border: none; padding: 0; cursor: pointer;" do %>
+              <%= button_to admin_event_path(event), method: :delete, form: { onsubmit: "return confirm('本当に削除しますか？')" }, style: "background: none; border: none; padding: 0; cursor: pointer;" do %>
                 <i class="fa-solid fa-trash" style="color: #f87171;"></i>
               <% end %>
             </div>
