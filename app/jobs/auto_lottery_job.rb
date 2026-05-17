@@ -1,11 +1,18 @@
 class AutoLotteryJob < ApplicationJob
   queue_as :default
 
-  def perform
-    Event.where(lottery_status: :published)
-         .where('entry_end_at <= ?', Time.current)
-         .where(lottery_executed_at: nil)
-         .find_each do |event|
+  def perform(event_id = nil)
+    scope = if event_id
+              Event.where(id: event_id)
+            else
+              # cronからの自動実行：autoモードのイベントのみ対象
+              Event.where(lottery_status: :published)
+                   .where(lottery_mode: :auto)
+                   .where('entry_end_at <= ?', Time.current)
+                   .where(lottery_executed_at: nil)
+            end
+
+    scope.find_each do |event|
       begin
         event.update!(lottery_status: :closed)
         event.execute_lottery! if event.entries.any?

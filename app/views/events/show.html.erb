@@ -15,6 +15,14 @@
     </p>
     <p style="margin: 10px 0 0 0; font-size: 14px; color: #4b5563;">当選枠数</p>
     <p style="margin: 5px 0 0 0; font-weight: bold;"><%= @event.winner_count %> 名</p>
+    <p style="margin: 10px 0 0 0; font-size: 14px; color: #4b5563;">抽選時間</p>
+    <p style="margin: 5px 0 0 0; font-weight: bold;">
+      <% if @event.scheduled? %>
+        <%= l @event.lottery_scheduled_at, format: :short %>
+      <% else %>
+        応募締切と同時に抽選
+      <% end %>
+    </p>
   </div>
 
   <div style="margin-bottom: 30px; line-height: 1.6;">
