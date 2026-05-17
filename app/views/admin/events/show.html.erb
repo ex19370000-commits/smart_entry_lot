@@ -8,19 +8,17 @@
     <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
       <span class="badge badge-<%= @event.lottery_status %>"><%= @event.lottery_status_i18n %></span>
 
-      <% if @event.closed? %>
-        <% if @event.already_drawn? %>
-          <span style="background-color: #052e16; color: #4ade80; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 12px; white-space: nowrap;">
-            <i class="fa-solid fa-circle-check"></i> 抽選済み <%= l @event.lottery_executed_at, format: :short %>
-          </span>
-        <% else %>
-          <%= button_to draw_lottery_admin_event_path(@event),
-                method: :post,
-                form: { data: { turbo_confirm: "抽選を実行しますか？この操作は取り消せません。" } },
-                class: "btn-primary",
-                style: "font-size: 13px; padding: 6px 16px;" do %>
-            <i class="fa-solid fa-shuffle"></i> 抽選を実行する
-          <% end %>
+      <% if @event.already_drawn? %>
+        <span style="background-color: #052e16; color: #4ade80; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 12px; white-space: nowrap;">
+          <i class="fa-solid fa-circle-check"></i> 抽選済み <%= l @event.lottery_executed_at, format: :short %>
+        </span>
+      <% elsif @event.closed? %>
+        <%= button_to draw_lottery_admin_event_path(@event),
+              method: :post,
+              form: { onsubmit: "return confirm('抽選を実行しますか？この操作は取り消せません。')" },
+              class: "btn-primary",
+              style: "font-size: 13px; padding: 6px 16px;" do %>
+          <i class="fa-solid fa-shuffle"></i> 今すぐ実行
         <% end %>
       <% end %>
     </div>
@@ -48,6 +46,21 @@
             <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 4px;">当選枠数</p>
             <p style="font-size: 14px; font-weight: 600;"><%= @event.winner_count %> 名</p>
           </div>
+        </div>
+
+        <div style="margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--admin-border);">
+          <p style="font-size: 12px; color: var(--admin-text-muted); margin-bottom: 4px;">抽選タイミング</p>
+          <% if @event.scheduled? %>
+            <p style="font-size: 14px; font-weight: 600;">
+              <i class="fa-solid fa-clock" style="color: var(--admin-accent);"></i>
+              スケジューリング抽選：<%= l @event.lottery_scheduled_at, format: :short %>
+            </p>
+          <% else %>
+            <p style="font-size: 14px; font-weight: 600;">
+              <i class="fa-solid fa-bolt" style="color: #facc15;"></i>
+              応募締切と同時に抽選
+            </p>
+          <% end %>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--admin-border);">

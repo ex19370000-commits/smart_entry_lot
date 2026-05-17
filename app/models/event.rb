@@ -10,6 +10,11 @@ class Event < ApplicationRecord
   # 抽選ステータス管理 (0:下書き, 1:公開, 2:終了)
   enum lottery_status: { draft: 0, published: 1, closed: 2 }
 
+  # 抽選モード (0:応募終了後即抽選, 1:スケジューリング抽選)
+  enum lottery_mode: { auto: 0, scheduled: 1 }
+
+  validates :lottery_scheduled_at, presence: true, if: :scheduled?
+
   # バリデーション
   validates :title, presence: true
   validates :description, presence: true

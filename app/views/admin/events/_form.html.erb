@@ -57,6 +57,27 @@
     <%= f.select :lottery_status, Event.lottery_statuses_i18n.invert, {}, class: "form-control" %>
   </div>
 
+  <div class="form-group">
+    <%= f.label :lottery_mode, "抽選タイミング" %>
+    <%= f.select :lottery_mode,
+          [["応募締切と同時に抽選", "auto"], ["スケジューリング抽選", "scheduled"]],
+          {},
+          class: "form-control",
+          id: "lottery_mode_select" %>
+  </div>
+
+  <div class="form-group" id="lottery_scheduled_at_field" style="<%= event.auto? ? 'display:none;' : '' %>">
+    <%= f.label :lottery_scheduled_at, "抽選予定日時" %>
+    <%= f.datetime_field :lottery_scheduled_at, class: "form-control" %>
+  </div>
+
+  <script>
+    document.getElementById('lottery_mode_select').addEventListener('change', function() {
+      var field = document.getElementById('lottery_scheduled_at_field');
+      field.style.display = this.value === 'scheduled' ? 'block' : 'none';
+    });
+  </script>
+
   <div class="form-actions">
     <%# 渡された event が新規か既存かで文字を自動切り替え %>
     <%= f.submit event.new_record? ? "イベントを作成する" : "イベントを更新する", class: "btn-primary" %>
