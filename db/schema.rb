@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_05_17_100000) do
+ActiveRecord::Schema[7.0].define(version: 2026_05_17_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -189,6 +189,16 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_17_100000) do
     t.index ["scheduled_at"], name: "index_good_jobs_on_scheduled_at", where: "(finished_at IS NULL)"
   end
 
+  create_table "page_views", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.string "cookie_uuid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_page_views_on_created_at"
+    t.index ["event_id", "cookie_uuid"], name: "index_page_views_on_event_id_and_cookie_uuid"
+    t.index ["event_id"], name: "index_page_views_on_event_id"
+  end
+
   create_table "shops", force: :cascade do |t|
     t.string "name"
     t.string "address"
@@ -226,5 +236,6 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_17_100000) do
   add_foreign_key "entries", "events"
   add_foreign_key "entries", "shops"
   add_foreign_key "entries", "users"
+  add_foreign_key "page_views", "events"
   add_foreign_key "sms_verifications", "users"
 end

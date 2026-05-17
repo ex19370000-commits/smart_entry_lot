@@ -1,6 +1,6 @@
 class Admin::EventsController < ApplicationController
   before_action :require_admin_login
-  before_action :set_event, only: %i[show edit update destroy draw_lottery]
+  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard]
   layout 'admin'
 
   def index
@@ -48,6 +48,28 @@ class Admin::EventsController < ApplicationController
     redirect_to admin_events_path, notice: "イベントを削除しました", status: :see_other
   end
 
+  def dashboard
+    entries  = @event.entries
+    @period  = params[:period] || '7days'
+    range, @labels, keys = build_chart_range(@period)
+
+    page_views     = @event.page_views
+    raw_access     = page_views.where(created_at: range).group(group_key(@period)).distinct.count(:cookie_uuid).transform_keys(&:to_s)
+    raw_entries    = entries.where(created_at: range).group(group_key(@period)).count.transform_keys(&:to_s)
+    @chart_access  = keys.map { |k| raw_access[k] || 0 }
+    @chart_entries = keys.map { |k| raw_entries[k] || 0 }
+
+    total_access     = page_views.distinct.count(:cookie_uuid)
+    total_entries    = entries.count
+    @entry_rate      = total_access > 0 ? (total_entries.to_f / total_access * 100).round(1) : 0
+
+    line_users       = entries.joins(:user).where.not(users: { line_uid: nil })
+    verified_users   = line_users.where(users: { phone_verified: true })
+    @sms_verify_rate = line_users.count > 0 ? (verified_users.count.to_f / line_users.count * 100).round(1) : 0
+
+    @recent_entries  = entries.includes(:user).order(created_at: :desc).limit(10)
+  end
+
   def draw_lottery
     cancel_lottery_job(@event)
     @event.execute_lottery!
@@ -70,6 +92,37 @@ class Admin::EventsController < ApplicationController
 
   def event_params
     params.require(:event).permit(:title, :description, :entry_start_at, :entry_end_at, :lottery_status, :winner_count, :image, :lottery_mode, :lottery_scheduled_at)
+  end
+
+  def build_chart_range(period)
+    case period
+    when 'today'
+      range  = Time.current.beginning_of_day..Time.current.end_of_day
+      labels = (0..23).map { |h| format('%02d:00', h) }
+      keys   = labels
+    when 'week'
+      start  = Time.current.beginning_of_week
+      range  = start..Time.current.end_of_day
+      days   = (start.to_date..Date.today).to_a
+      labels = days.map { |d| d.strftime('%-m/%-d') }
+      keys   = days.map(&:to_s)
+    when 'month'
+      start  = Time.current.beginning_of_month
+      range  = start..Time.current.end_of_day
+      days   = (start.to_date..Date.today).to_a
+      labels = days.map { |d| d.strftime('%-m/%-d') }
+      keys   = days.map(&:to_s)
+    else
+      days   = 6.downto(0).map { |i| i.days.ago.to_date }
+      range  = days.last.beginning_of_day..Time.current.end_of_day
+      labels = days.map { |d| d.strftime('%-m/%-d') }
+      keys   = days.map(&:to_s)
+    end
+    [range, labels, keys]
+  end
+
+  def group_key(period)
+    period == 'today' ? "TO_CHAR(created_at AT TIME ZONE 'Asia/Tokyo', 'HH24:00')" : "DATE(created_at AT TIME ZONE 'Asia/Tokyo')"
   end
 
   def schedule_lottery_job(event)

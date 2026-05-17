@@ -1,0 +1,114 @@
+<% content_for :breadcrumb, "ダッシュボード / #{@event.title}" %>
+
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+  <h1 style="font-size: 22px; font-weight: 700; margin: 0;"><%= @event.title %></h1>
+  <span class="badge badge-<%= @event.lottery_status %>"><%= @event.lottery_status_i18n %></span>
+  <%= link_to admin_event_path(@event), style: "font-size: 13px; color: var(--admin-text-muted); text-decoration: none; margin-left: auto;" do %>
+    <i class="fa-solid fa-arrow-up-right-from-square"></i> イベント詳細
+  <% end %>
+</div>
+
+<%# ── サマリーカード ── %>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 30px;">
+  <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+    <p style="font-size: 12px; color: var(--admin-text-muted); margin: 0 0 8px;">総応募者数</p>
+    <p style="font-size: 32px; font-weight: 700; margin: 0; color: var(--admin-accent);"><%= @event.entries.count %><span style="font-size: 16px;"> 名</span></p>
+  </div>
+  <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+    <p style="font-size: 12px; color: var(--admin-text-muted); margin: 0 0 8px;">応募率</p>
+    <p style="font-size: 32px; font-weight: 700; margin: 0; color: #facc15;"><%= @entry_rate %><span style="font-size: 16px;">%</span></p>
+    <p style="font-size: 12px; color: var(--admin-text-muted); margin: 6px 0 0;">訪問者のうち応募した割合</p>
+  </div>
+  <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+    <p style="font-size: 12px; color: var(--admin-text-muted); margin: 0 0 8px;">SMS認証完了率</p>
+    <p style="font-size: 32px; font-weight: 700; margin: 0; color: #60a5fa;"><%= @sms_verify_rate %><span style="font-size: 16px;">%</span></p>
+    <p style="font-size: 12px; color: var(--admin-text-muted); margin: 6px 0 0;">応募者のうちSMS認証済み</p>
+  </div>
+  <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+    <p style="font-size: 12px; color: var(--admin-text-muted); margin: 0 0 8px;">当選枠数</p>
+    <p style="font-size: 32px; font-weight: 700; margin: 0;"><%= @event.winner_count %><span style="font-size: 16px;"> 名</span></p>
+  </div>
+</div>
+
+<%# ── 期間フィルタ ── %>
+<div style="display: flex; gap: 8px; margin-bottom: 20px;">
+  <% [['7days', '過去7日'], ['today', '今日'], ['week', '今週'], ['month', '今月']].each do |value, label| %>
+    <%= link_to dashboard_admin_event_path(@event, period: value),
+          style: "padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; text-decoration: none; #{@period == value ? 'background-color: var(--admin-accent); color: #020617;' : 'background-color: var(--admin-bg-panel); color: var(--admin-text-muted); border: 1px solid var(--admin-border);'}" do %>
+      <%= label %>
+    <% end %>
+  <% end %>
+</div>
+
+<%# ── グラフ ── %>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+  <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 16px;">アクセス数</h2>
+    <canvas id="accessChart"
+            data-labels="<%= @labels.to_json %>"
+            data-values="<%= @chart_access.to_json %>"
+            style="max-height: 200px;"></canvas>
+  </div>
+  <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 16px;">応募者数</h2>
+    <canvas id="entriesChart"
+            data-labels="<%= @labels.to_json %>"
+            data-values="<%= @chart_entries.to_json %>"
+            style="max-height: 200px;"></canvas>
+  </div>
+</div>
+
+<script>
+  (function() {
+    function buildChart(id, color) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      new Chart(el, {
+        type: 'bar',
+        data: {
+          labels: JSON.parse(el.dataset.labels),
+          datasets: [{ data: JSON.parse(el.dataset.values), backgroundColor: color, borderRadius: 4 }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#94a3b8', font: { size: 11 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+          }
+        }
+      });
+    }
+    buildChart('accessChart',  '#10b981');
+    buildChart('entriesChart', '#60a5fa');
+  })();
+</script>
+
+<%# ── 直近の応募アクティビティ ── %>
+<div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+  <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 16px;">直近の応募</h2>
+  <% if @recent_entries.any? %>
+    <% @recent_entries.each do |entry| %>
+      <div style="display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--admin-border);">
+        <% if entry.user&.picture_url.present? %>
+          <img src="<%= entry.user.picture_url %>" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+        <% else %>
+          <div style="width: 32px; height: 32px; border-radius: 50%; background-color: #06C755; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+            <span style="color: #fff; font-size: 13px; font-weight: bold;"><%= entry.user&.display_name&.first %></span>
+          </div>
+        <% end %>
+        <div style="flex: 1;">
+          <p style="margin: 0; font-size: 13px; font-weight: 600;"><%= entry.user&.display_name %></p>
+          <% if entry.win? || entry.lose? %>
+            <p style="margin: 2px 0 0; font-size: 11px; color: <%= entry.win? ? '#4ade80' : '#9ca3af' %>;">
+              <%= entry.win? ? '当選' : '落選' %>
+            </p>
+          <% end %>
+        </div>
+        <span style="font-size: 11px; color: var(--admin-text-muted); white-space: nowrap;"><%= l entry.created_at, format: :short %></span>
+      </div>
+    <% end %>
+  <% else %>
+    <p style="color: var(--admin-text-muted); font-size: 14px; margin: 0;">応募データがありません</p>
+  <% end %>
+</div>
