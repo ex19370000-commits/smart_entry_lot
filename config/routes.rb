@@ -27,6 +27,7 @@ Rails.application.routes.draw do
     resources :events do
       member do
         post :draw_lottery
+        get  :dashboard
       end
     end
 

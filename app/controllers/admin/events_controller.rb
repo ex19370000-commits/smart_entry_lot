@@ -1,6 +1,6 @@
 class Admin::EventsController < ApplicationController
   before_action :require_admin_login
-  before_action :set_event, only: %i[show edit update destroy draw_lottery]
+  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard]
   layout 'admin'
 
   def index
@@ -46,6 +46,30 @@ class Admin::EventsController < ApplicationController
     cancel_lottery_job(@event)
     @event.destroy!
     redirect_to admin_events_path, notice: "イベントを削除しました", status: :see_other
+  end
+
+  def dashboard
+    entries = @event.entries
+
+    @daily_entries = entries
+                       .where(created_at: 7.days.ago.beginning_of_day..)
+                       .group("DATE(created_at)")
+                       .count
+    @daily_access = entries
+                      .where(created_at: 7.days.ago.beginning_of_day..)
+                      .group("DATE(created_at)")
+                      .distinct
+                      .count(:cookie_uuid)
+
+    total_access  = entries.distinct.count(:cookie_uuid)
+    total_entries = entries.count
+    @entry_rate   = total_access > 0 ? (total_entries.to_f / total_access * 100).round(1) : 0
+
+    line_users      = entries.joins(:user).where.not(users: { line_uid: nil })
+    verified_users  = line_users.where(users: { phone_verified: true })
+    @sms_verify_rate = line_users.count > 0 ? (verified_users.count.to_f / line_users.count * 100).round(1) : 0
+
+    @recent_entries = entries.includes(:user).order(created_at: :desc).limit(10)
   end
 
   def draw_lottery
