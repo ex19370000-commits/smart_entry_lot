@@ -32,6 +32,9 @@ Rails.application.routes.draw do
 
     # アクセスログ（不正検知）
     resources :access_logs, only: %i[index]
+
+    # 店舗アカウント発行（owner のみ）
+    resources :admins, only: %i[index new create destroy]
   end
   
   # 一般応募者用のルーティング（IDではなく public_token で検索する）

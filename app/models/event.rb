@@ -2,6 +2,7 @@ class Event < ApplicationRecord
   # Active Storageで画像を1枚紐付け
   has_one_attached :image
   has_many :entries, dependent: :destroy
+  belongs_to :admin, optional: true
   
   # 自動でランダムな一意のトークンを生成する設定
   has_secure_token :public_token
