@@ -1,6 +1,6 @@
 class Admin::EventsController < ApplicationController
   before_action :require_admin_login
-  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard]
+  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard export_entries]
   layout 'admin'
 
   def index
@@ -68,6 +68,41 @@ class Admin::EventsController < ApplicationController
     @sms_verify_rate = line_users.count > 0 ? (verified_users.count.to_f / line_users.count * 100).round(1) : 0
 
     @recent_entries  = entries.includes(:user).order(created_at: :desc).limit(10)
+  end
+
+  def export_entries
+    require 'csv'
+
+    winners_only = params[:winners_only] == 'true'
+    entries = @event.entries.includes(:user).order(created_at: :asc)
+    entries = entries.win if winners_only
+
+    label = winners_only ? '当選者' : '応募者全員'
+    filename = "#{@event.title}_#{label}_#{Date.today}.csv"
+
+    result_labels = { 'win' => '当選', 'lose' => '落選' }
+
+    csv_data = CSV.generate(headers: true, encoding: 'UTF-8') do |csv|
+      headers = ['応募日時', 'イベント名', 'LINE表示名', '電話番号']
+      headers << '当落結果' unless winners_only
+      csv << headers
+
+      entries.each do |entry|
+        row = [
+          entry.created_at.in_time_zone('Asia/Tokyo').strftime('%Y-%m-%d %H:%M'),
+          @event.title,
+          entry.user&.display_name,
+          entry.user&.phone_number
+        ]
+        row << (result_labels[entry.result] || '未抽選') unless winners_only
+        csv << row
+      end
+    end
+
+    send_data "﻿#{csv_data}",
+              filename: filename,
+              type: 'text/csv; charset=utf-8',
+              disposition: 'attachment'
   end
 
   def draw_lottery

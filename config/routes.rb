@@ -28,6 +28,7 @@ Rails.application.routes.draw do
       member do
         post :draw_lottery
         get  :dashboard
+        get  :export_entries
       end
     end
 

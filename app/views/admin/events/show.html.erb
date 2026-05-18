@@ -107,10 +107,26 @@
 
   <%# 応募者一覧セクション %>
   <div style="margin-top: 40px; border-top: 1px solid var(--admin-border); padding-top: 30px;">
-    <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">
-      応募者一覧
-      <span style="font-size: 14px; font-weight: 400; color: var(--admin-text-muted); margin-left: 8px;"><%= @event.entries.count %> 名</span>
-    </h2>
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+      <h2 style="font-size: 18px; font-weight: 700; margin: 0;">
+        応募者一覧
+        <span style="font-size: 14px; font-weight: 400; color: var(--admin-text-muted); margin-left: 8px;"><%= @event.entries.count %> 名</span>
+      </h2>
+      <div style="display: flex; gap: 8px;">
+        <%= link_to export_entries_admin_event_path(@event, format: :csv),
+              class: "btn-secondary",
+              style: "font-size: 13px; padding: 6px 14px;" do %>
+          <i class="fa-solid fa-download"></i> 全応募者 CSV
+        <% end %>
+        <% if @event.already_drawn? %>
+          <%= link_to export_entries_admin_event_path(@event, winners_only: true, format: :csv),
+                class: "btn-secondary",
+                style: "font-size: 13px; padding: 6px 14px;" do %>
+            <i class="fa-solid fa-trophy"></i> 当選者 CSV
+          <% end %>
+        <% end %>
+      </div>
+    </div>
 
     <% entries = @event.entries.includes(:user).order(created_at: :asc) %>
     <% if entries.any? %>
