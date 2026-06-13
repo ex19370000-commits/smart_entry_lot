@@ -52,6 +52,8 @@ class Event < ApplicationRecord
       entries.where.not(id: winner_ids).update_all(result: Entry.results[:lose])
       update!(lottery_executed_at: Time.current)
     end
+
+    LotteryNotificationJob.perform_later(id)
   end
 
   # QRコードのSVGデータを生成するメソッド
