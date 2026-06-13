@@ -34,23 +34,25 @@ class LotteryNotificationJob < ApplicationJob
 
   def win_message(event)
     <<~MSG.strip
-      🎉 当選おめでとうございます！
+      【当選】#{event.title}
 
-      「#{event.title}」の抽選結果が出ました。
-      あなたは見事【当選】されました！
+      抽選の結果、当選されました。
+      おめでとうございます🎉
 
-      詳細・手続きはこちらからご確認ください。
+      応募ページより詳細をご確認ください。
       #{event.public_url}
     MSG
   end
 
   def lose_message(event)
     <<~MSG.strip
-      「#{event.title}」の抽選結果をお知らせします。
+      「#{event.title}」の
+      抽選結果をお知らせします。
 
-      今回は残念ながら【落選】となりました。
-      またの機会にぜひご応募ください。
+      今回は惜しくも落選となりました。
+      ご応募いただきありがとうございました。
 
+      次回のイベントもぜひご参加ください。
       #{event.public_url}
     MSG
   end
