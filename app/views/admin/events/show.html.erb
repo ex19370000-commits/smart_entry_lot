@@ -12,14 +12,19 @@
         <span style="background-color: #052e16; color: #4ade80; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 12px; white-space: nowrap;">
           <i class="fa-solid fa-circle-check"></i> 抽選済み <%= l @event.lottery_executed_at, format: :short %>
         </span>
+
+        <span id="notification-status-badge"
+              data-status-url="<%= notification_status_admin_event_path(@event) %>"
+              style="font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 12px; white-space: nowrap; background-color: #1f2937; color: #9ca3af;">
+          <i class="fa-solid fa-spinner fa-spin"></i> LINE通知 確認中…
+        </span>
       <% elsif @event.closed? %>
-        <%= button_to draw_lottery_admin_event_path(@event),
-              method: :post,
-              form: { onsubmit: "return confirm('抽選を実行しますか？この操作は取り消せません。')" },
-              class: "btn-primary",
-              style: "font-size: 13px; padding: 6px 16px;" do %>
+        <button id="draw-lottery-btn"
+                data-url="<%= draw_lottery_admin_event_path(@event) %>"
+                class="btn-primary"
+                style="font-size: 13px; padding: 6px 16px;">
           <i class="fa-solid fa-shuffle"></i> 今すぐ実行
-        <% end %>
+        </button>
       <% end %>
     </div>
   </div>
@@ -183,3 +188,72 @@
     <% end %>
   </div>
 </div>
+
+<script>
+  (function() {
+    const btn = document.getElementById('draw-lottery-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', async function() {
+      if (!confirm('抽選を実行しますか？この操作は取り消せません。')) return;
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 抽選実行中…';
+
+      try {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+        const res = await fetch(btn.dataset.url, {
+          method: 'POST',
+          headers: { 'X-CSRF-Token': csrfToken, 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+        if (res.ok) {
+          window.location.href = data.redirect_url || window.location.pathname;
+        } else {
+          throw new Error(data.error || '抽選実行に失敗しました');
+        }
+      } catch (err) {
+        alert(err.message);
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-shuffle"></i> 今すぐ実行';
+      }
+    });
+  })();
+</script>
+
+<% if @event.already_drawn? %>
+  <script>
+    (function() {
+      const badge = document.getElementById('notification-status-badge');
+      if (!badge) return;
+
+      const statusConfig = {
+        success: { icon: 'fa-circle-check', text: 'LINE通知 送信完了', bg: '#052e16', color: '#4ade80' },
+        error:   { icon: 'fa-circle-exclamation', text: 'LINE通知 送信失敗', bg: '#450a0a', color: '#f87171' },
+        pending: { icon: 'fa-spinner fa-spin', text: 'LINE通知 送信中…', bg: '#1f2937', color: '#9ca3af' },
+        unknown: { icon: 'fa-circle-question', text: 'LINE通知 状況不明', bg: '#1f2937', color: '#9ca3af' }
+      };
+
+      function applyStatus(status) {
+        const config = statusConfig[status] || statusConfig.unknown;
+        badge.innerHTML = `<i class="fa-solid ${config.icon}"></i> ${config.text}`;
+        badge.style.backgroundColor = config.bg;
+        badge.style.color = config.color;
+      }
+
+      function poll() {
+        fetch(badge.dataset.statusUrl, { headers: { 'Accept': 'application/json' } })
+          .then(res => res.json())
+          .then(data => {
+            applyStatus(data.status);
+            if (data.status === 'pending' || data.status === 'unknown') {
+              setTimeout(poll, 3000);
+            }
+          })
+          .catch(() => setTimeout(poll, 5000));
+      }
+
+      poll();
+    })();
+  </script>
+<% end %>

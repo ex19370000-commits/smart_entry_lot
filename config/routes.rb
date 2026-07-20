@@ -29,6 +29,7 @@ Rails.application.routes.draw do
         post :draw_lottery
         get  :dashboard
         get  :export_entries
+        get  :notification_status
       end
     end
 

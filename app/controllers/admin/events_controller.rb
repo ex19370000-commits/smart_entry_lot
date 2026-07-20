@@ -1,6 +1,6 @@
 class Admin::EventsController < ApplicationController
   before_action :require_admin_login
-  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard export_entries]
+  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard export_entries notification_status]
   layout 'admin'
 
   def index
@@ -108,10 +108,37 @@ class Admin::EventsController < ApplicationController
   def draw_lottery
     cancel_lottery_job(@event)
     @event.execute_lottery!
-    redirect_to admin_event_path(@event), notice: "抽選を実行しました。当選者 #{@event.winner_count} 名が選出されました。", status: :see_other
+    respond_to do |format|
+      format.html { redirect_to admin_event_path(@event), notice: "抽選を実行しました。当選者 #{@event.winner_count} 名が選出されました。", status: :see_other }
+      format.json { render json: { redirect_url: admin_event_path(@event) } }
+    end
   rescue RuntimeError => e
-    redirect_to admin_event_path(@event), alert: e.message, status: :see_other
-  end 
+    respond_to do |format|
+      format.html { redirect_to admin_event_path(@event), alert: e.message, status: :see_other }
+      format.json { render json: { error: e.message }, status: :unprocessable_entity }
+    end
+  end
+
+  # LINE通知ジョブの送信状況をポーリング確認用に返す
+  def notification_status
+    job = Object.const_get('GoodJob::Job')
+                .where(job_class: 'LotteryNotificationJob')
+                .where("serialized_params -> 'arguments' = ?", [@event.id].to_json)
+                .order(created_at: :desc)
+                .first
+
+    status = if job.nil?
+               'unknown'
+             elsif job.finished_at.present? && job.error.blank?
+               'success'
+             elsif job.finished_at.present? && job.error.present?
+               'error'
+             else
+               'pending'
+             end
+
+    render json: { status: status }
+  end
 
   private
 
