@@ -1,6 +1,6 @@
 class Admin::EventsController < ApplicationController
   before_action :require_admin_login
-  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard export_entries notification_status]
+  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard export_entries notification_status scanner verify_checkin]
   layout 'admin'
 
   def index
@@ -119,6 +119,36 @@ class Admin::EventsController < ApplicationController
     end
   end
 
+  def scanner
+    redirect_to admin_event_path(@event), alert: "このイベントはチェックイン機能が無効です" unless @event.checkin_enabled?
+  end
+
+  def verify_checkin
+    token = params[:token].to_s.strip
+    entry = @event.entries.find_by(checkin_token: token)
+
+    if entry.nil?
+      render json: { status: 'invalid', message: '無効なQRコードです' }, status: :unprocessable_entity
+    elsif !entry.win?
+      render json: { status: 'invalid', message: 'このQRコードは当選者のものではありません' }, status: :unprocessable_entity
+    elsif entry.checked_in?
+      render json: {
+        status: 'already_checked_in',
+        message: '既にチェックイン済みです',
+        checked_in_at: l(entry.checked_in_at.in_time_zone('Asia/Tokyo'), format: :short),
+        user_name: entry.user&.display_name
+      }
+    else
+      entry.update!(checked_in_at: Time.current)
+      render json: {
+        status: 'success',
+        message: 'チェックイン完了',
+        user_name: entry.user&.display_name,
+        picture_url: entry.user&.picture_url
+      }
+    end
+  end
+
   # LINE通知ジョブの送信状況をポーリング確認用に返す
   def notification_status
     job = Object.const_get('GoodJob::Job')
@@ -153,7 +183,7 @@ class Admin::EventsController < ApplicationController
   end
 
   def event_params
-    params.require(:event).permit(:title, :description, :entry_start_at, :entry_end_at, :lottery_status, :winner_count, :image, :lottery_mode, :lottery_scheduled_at)
+    params.require(:event).permit(:title, :description, :entry_start_at, :entry_end_at, :lottery_status, :winner_count, :image, :lottery_mode, :lottery_scheduled_at, :checkin_enabled)
   end
 
   def build_chart_range(period)

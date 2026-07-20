@@ -30,6 +30,8 @@ Rails.application.routes.draw do
         get  :dashboard
         get  :export_entries
         get  :notification_status
+        get  :scanner
+        post :verify_checkin
       end
     end
 

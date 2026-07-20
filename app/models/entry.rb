@@ -6,6 +6,10 @@ class Entry < ApplicationRecord
   enum result: { lose: 0, win: 1 }
   enum status: { unexchanged: 0, exchanged: 1 }
 
+  def checked_in?
+    checked_in_at.present?
+  end
+
   validate :only_one_entry_per_event, on: :create
 
   private
