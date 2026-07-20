@@ -4,6 +4,17 @@ class EntriesController < ApplicationController
   before_action :set_event
 
   def create
+    # reCAPTCHA v3 スコア検証
+    recaptcha_result = RecaptchaVerifier.verify(
+      token:     params[:recaptcha_token],
+      remote_ip: request.remote_ip
+    )
+    unless recaptcha_result.human?
+      Rails.logger.warn("[reCAPTCHA] ボット疑い user_id=#{current_user.id} score=#{recaptcha_result.score} ip=#{request.remote_ip}")
+      redirect_to event_path(@event.public_token), status: :see_other, alert: "お使いの環境では応募できません。LINEアプリから再度お試しください。"
+      return
+    end
+
     # cookieが異なる別ブラウザ・別端末からの応募を検知してブロック
     if cookie_duplicate?
       redirect_to event_path(@event.public_token), status: :see_other, alert: "このブラウザからは既に応募済みです"
