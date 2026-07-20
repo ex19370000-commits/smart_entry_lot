@@ -1,5 +1,7 @@
 <%# LIFF SDKの読み込み %>
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<%# reCAPTCHA v3の読み込み %>
+<script src="https://www.google.com/recaptcha/api.js?render=<%= ENV['RECAPTCHA_SITE_KEY'] %>"></script>
 
 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
   <% if @event.image.attached? %>
@@ -88,9 +90,11 @@
           </div>
         <% end %>
       <% else %>
-        <%= form_with url: entries_path, method: :post do |f| %>
+        <%= form_with url: entries_path, method: :post, html: { id: 'entry-form' } do |f| %>
           <%= hidden_field_tag :event_token, @event.public_token %>
+          <%= hidden_field_tag :recaptcha_token, '', id: 'recaptcha_token' %>
           <%= f.submit "このイベントに応募する",
+                id: "entry-submit-btn",
                 style: "width: 100%; padding: 15px; background-color: #06C755; color: #ffffff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;" %>
         <% end %>
       <% end %>
@@ -223,4 +227,25 @@
   }
 
   if (document.readyState !== "loading") { initializeOnLoad(); }
+
+  // reCAPTCHA v3: フォーム送信前にトークンを取得してから送信
+  const entryForm = document.getElementById('entry-form');
+  if (entryForm) {
+    entryForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('entry-submit-btn');
+      btn.disabled = true;
+      btn.value = '応募処理中…';
+
+      try {
+        const token = await grecaptcha.execute('<%= ENV['RECAPTCHA_SITE_KEY'] %>', { action: 'entry' });
+        document.getElementById('recaptcha_token').value = token;
+        entryForm.submit();
+      } catch (err) {
+        // reCAPTCHAが失敗しても応募は継続（サーバー側で空トークンとして処理）
+        console.error('reCAPTCHA error:', err);
+        entryForm.submit();
+      }
+    });
+  }
 </script>
