@@ -2,9 +2,20 @@
 <html>
   <head>
     <title>SmartEntryLot</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      body {
+        -webkit-tap-highlight-color: transparent;
+        padding-bottom: env(safe-area-inset-bottom, 0);
+      }
+      footer {
+        padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 24px));
+      }
+    </style>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
   </head>
