@@ -12,6 +12,7 @@ class Admin::EventsController < ApplicationController
   end
 
   def show
+    @entries = @event.entries.includes(:user).order(created_at: :asc).page(params[:page]).per(20)
   end
 
   def new
