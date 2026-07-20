@@ -133,6 +133,7 @@
       </div>
     </div>
 
+    <%= turbo_frame_tag "entries-list" do %>
     <% if @entries.any? %>
       <div class="admin-table-container">
         <table class="admin-table">
@@ -220,6 +221,7 @@
       <% end %>
     <% else %>
       <p style="color: var(--admin-text-muted); font-size: 14px;">まだ応募者がいません。</p>
+    <% end %>
     <% end %>
   </div>
 
