@@ -139,7 +139,7 @@ class Admin::EventsController < ApplicationController
         user_name: entry.user&.display_name
       }
     else
-      entry.update!(checked_in_at: Time.current)
+      entry.update!(checked_in_at: Time.current, status: :exchanged)
       render json: {
         status: 'success',
         message: 'チェックイン完了',
