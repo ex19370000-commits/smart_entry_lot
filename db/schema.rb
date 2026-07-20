@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2026_05_17_200000) do
+ActiveRecord::Schema[7.0].define(version: 2026_07_20_045714) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -63,6 +63,9 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_17_200000) do
     t.string "cookie_uuid"
     t.string "ip_address"
     t.text "user_agent"
+    t.string "checkin_token"
+    t.datetime "checked_in_at"
+    t.index ["checkin_token"], name: "index_entries_on_checkin_token", unique: true
     t.index ["cookie_uuid", "event_id"], name: "index_entries_on_cookie_uuid_and_event_id"
     t.index ["event_id"], name: "index_entries_on_event_id"
     t.index ["ip_address"], name: "index_entries_on_ip_address"
@@ -86,6 +89,8 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_17_200000) do
     t.integer "lottery_mode", default: 0, null: false
     t.datetime "lottery_scheduled_at"
     t.string "scheduled_job_id"
+    t.boolean "runnerup_enabled", default: false, null: false
+    t.boolean "checkin_enabled", default: false, null: false
     t.index ["public_token"], name: "index_events_on_public_token", unique: true
   end
 
@@ -199,6 +204,17 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_17_200000) do
     t.index ["event_id"], name: "index_page_views_on_event_id"
   end
 
+  create_table "runnerup_lotteries", force: :cascade do |t|
+    t.bigint "event_id", null: false
+    t.integer "additional_winner_count", null: false
+    t.datetime "executed_at", null: false
+    t.bigint "admin_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_id"], name: "index_runnerup_lotteries_on_admin_id"
+    t.index ["event_id"], name: "index_runnerup_lotteries_on_event_id"
+  end
+
   create_table "shops", force: :cascade do |t|
     t.string "name"
     t.string "address"
@@ -237,5 +253,7 @@ ActiveRecord::Schema[7.0].define(version: 2026_05_17_200000) do
   add_foreign_key "entries", "shops"
   add_foreign_key "entries", "users"
   add_foreign_key "page_views", "events"
+  add_foreign_key "runnerup_lotteries", "admins"
+  add_foreign_key "runnerup_lotteries", "events"
   add_foreign_key "sms_verifications", "users"
 end

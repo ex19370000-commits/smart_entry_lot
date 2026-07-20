@@ -78,6 +78,16 @@
     });
   </script>
 
+  <div class="form-group">
+    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+      <%= f.check_box :checkin_enabled, style: "width: 16px; height: 16px; accent-color: var(--admin-accent); cursor: pointer;" %>
+      <span>店頭チェックインを有効にする</span>
+    </label>
+    <small style="color: var(--admin-text-muted); display: block; margin-top: 5px; padding-left: 26px;">
+      有効にすると、当選者に QR コードが表示され、店頭スキャンでチェックインできます
+    </small>
+  </div>
+
   <div class="form-actions">
     <%# 渡された event が新規か既存かで文字を自動切り替え %>
     <%= f.submit event.new_record? ? "イベントを作成する" : "イベントを更新する", class: "btn-primary" %>
