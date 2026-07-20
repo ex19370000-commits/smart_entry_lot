@@ -1,13 +1,15 @@
 class Admin::EventsController < ApplicationController
+  include Chartable
+
   before_action :require_admin_login
   before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard export_entries notification_status scanner verify_checkin]
   layout 'admin'
 
   def index
     @events = if current_admin.role_store?
-                current_admin.events.includes(:entries).order(created_at: :desc)
+                current_admin.events.includes(:entries).with_attached_image.order(created_at: :desc)
               else
-                Event.includes(:entries, :admin).order(created_at: :desc)
+                Event.includes(:entries, :admin).with_attached_image.order(created_at: :desc)
               end
   end
 
@@ -185,37 +187,6 @@ class Admin::EventsController < ApplicationController
 
   def event_params
     params.require(:event).permit(:title, :description, :entry_start_at, :entry_end_at, :lottery_status, :winner_count, :image, :lottery_mode, :lottery_scheduled_at, :checkin_enabled)
-  end
-
-  def build_chart_range(period)
-    case period
-    when 'today'
-      range  = Time.current.beginning_of_day..Time.current.end_of_day
-      labels = (0..23).map { |h| format('%02d:00', h) }
-      keys   = labels
-    when 'week'
-      start  = Time.current.beginning_of_week
-      range  = start..Time.current.end_of_day
-      days   = (start.to_date..Date.today).to_a
-      labels = days.map { |d| d.strftime('%-m/%-d') }
-      keys   = days.map(&:to_s)
-    when 'month'
-      start  = Time.current.beginning_of_month
-      range  = start..Time.current.end_of_day
-      days   = (start.to_date..Date.today).to_a
-      labels = days.map { |d| d.strftime('%-m/%-d') }
-      keys   = days.map(&:to_s)
-    else
-      days   = 6.downto(0).map { |i| i.days.ago.to_date }
-      range  = days.last.beginning_of_day..Time.current.end_of_day
-      labels = days.map { |d| d.strftime('%-m/%-d') }
-      keys   = days.map(&:to_s)
-    end
-    [range, labels, keys]
-  end
-
-  def group_key(period)
-    period == 'today' ? "TO_CHAR(created_at AT TIME ZONE 'Asia/Tokyo', 'HH24:00')" : "DATE(created_at AT TIME ZONE 'Asia/Tokyo')"
   end
 
   def schedule_lottery_job(event)

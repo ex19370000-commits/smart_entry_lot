@@ -136,25 +136,24 @@
 
     <% if current_user.phone_verified? %>
       <%# ③ LINE・SMS 両方完了 → 応募ボタン or 結果表示 %>
-      <% my_entry = @event.entries.find_by(user: current_user) %>
-      <% if my_entry %>
+      <% if @my_entry %>
         <% if @event.already_drawn? %>
-          <% if my_entry.win? %>
+          <% if @my_entry.win? %>
             <%# 当選 %>
             <div id="win-card" style="width: 100%; padding: 20px 15px; background-color: #fefce8; border: 2px solid #eab308; border-radius: 8px; text-align: center; box-sizing: border-box;">
               <p id="win-emoji" style="margin: 0 0 6px 0; font-size: 32px;">🎉</p>
               <p id="win-title" style="margin: 0; font-size: 18px; font-weight: bold;">おめでとうございます！ご当選です！</p>
-              <% if @event.checkin_enabled? && my_entry.checkin_token.present? %>
+              <% if @event.checkin_enabled? && @my_entry.checkin_token.present? %>
                 <p style="margin: 8px 0 12px 0; font-size: 13px; color: #92400e;">来店時に以下のQRコードをスタッフにご提示ください。</p>
                 <div style="background-color: #fff; display: inline-block; padding: 12px; border-radius: 8px; margin-bottom: 8px;">
-                  <%= raw RQRCode::QRCode.new(my_entry.checkin_token).as_svg(
+                  <%= raw RQRCode::QRCode.new(@my_entry.checkin_token).as_svg(
                         color: "000", shape_rendering: "crispEdges",
                         module_size: 5, standalone: true, use_path: true
                       ) %>
                 </div>
-                <% if my_entry.checked_in? %>
+                <% if @my_entry.checked_in? %>
                   <p style="margin: 4px 0 0; font-size: 12px; color: #15803d; font-weight: 600;">
-                    ✓ チェックイン済み（<%= l my_entry.checked_in_at.in_time_zone('Asia/Tokyo'), format: :short %>）
+                    ✓ チェックイン済み（<%= l @my_entry.checked_in_at.in_time_zone('Asia/Tokyo'), format: :short %>）
                   </p>
                 <% end %>
               <% else %>
@@ -175,7 +174,7 @@
             <div style="background-color: #059c43; padding: 16px; text-align: center;">
               <p style="margin: 0 0 6px 0; font-size: 24px;">✅</p>
               <p style="margin: 0 0 4px 0; color: #ffffff; font-weight: 700; font-size: 16px;">応募受付完了！</p>
-              <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 12px;"><%= l my_entry.created_at.in_time_zone('Asia/Tokyo'), format: :short %> に受け付けました</p>
+              <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 12px;"><%= l @my_entry.created_at.in_time_zone('Asia/Tokyo'), format: :short %> に受け付けました</p>
             </div>
             <div style="background-color: #ffffff; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
               <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background-color: #f3f4f6; border-radius: 6px;">
