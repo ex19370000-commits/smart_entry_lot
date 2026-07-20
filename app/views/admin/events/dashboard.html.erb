@@ -30,40 +30,43 @@
   </div>
 </div>
 
-<%# ── 期間フィルタ ── %>
-<div style="display: flex; gap: 8px; margin-bottom: 20px;">
-  <% [['7days', '過去7日'], ['today', '今日'], ['week', '今週'], ['month', '今月']].each do |value, label| %>
-    <%= link_to dashboard_admin_event_path(@event, period: value),
-          style: "padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; text-decoration: none; #{@period == value ? 'background-color: var(--admin-accent); color: #020617;' : 'background-color: var(--admin-bg-panel); color: var(--admin-text-muted); border: 1px solid var(--admin-border);'}" do %>
-      <%= label %>
+<%= turbo_frame_tag "event_dashboard_chart_frame" do %>
+  <%# ── 期間フィルタ ── %>
+  <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+    <% [['7days', '過去7日'], ['today', '今日'], ['week', '今週'], ['month', '今月']].each do |value, label| %>
+      <%= link_to dashboard_admin_event_path(@event, period: value),
+            style: "padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; text-decoration: none; #{@period == value ? 'background-color: var(--admin-accent); color: #020617;' : 'background-color: var(--admin-bg-panel); color: var(--admin-text-muted); border: 1px solid var(--admin-border);'}" do %>
+        <%= label %>
+      <% end %>
     <% end %>
-  <% end %>
-</div>
+  </div>
 
-<%# ── グラフ ── %>
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
-  <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
-    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 16px;">アクセス数</h2>
-    <canvas id="accessChart"
-            data-labels="<%= @labels.to_json %>"
-            data-values="<%= @chart_access.to_json %>"
-            style="max-height: 200px;"></canvas>
+  <%# ── グラフ ── %>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+    <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+      <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 16px;">アクセス数</h2>
+      <canvas id="accessChart"
+              data-labels="<%= @labels.to_json %>"
+              data-values="<%= @chart_access.to_json %>"
+              style="max-height: 200px;"></canvas>
+    </div>
+    <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
+      <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 16px;">応募者数</h2>
+      <canvas id="entriesChart"
+              data-labels="<%= @labels.to_json %>"
+              data-values="<%= @chart_entries.to_json %>"
+              style="max-height: 200px;"></canvas>
+    </div>
   </div>
-  <div style="background-color: var(--admin-bg-panel); border: 1px solid var(--admin-border); border-radius: 12px; padding: 24px;">
-    <h2 style="font-size: 16px; font-weight: 600; margin: 0 0 16px;">応募者数</h2>
-    <canvas id="entriesChart"
-            data-labels="<%= @labels.to_json %>"
-            data-values="<%= @chart_entries.to_json %>"
-            style="max-height: 200px;"></canvas>
-  </div>
-</div>
+<% end %>
 
 <script>
   (function() {
     function buildChart(id, color) {
       const el = document.getElementById(id);
       if (!el) return;
-      new Chart(el, {
+      if (el._chartInstance) el._chartInstance.destroy();
+      el._chartInstance = new Chart(el, {
         type: 'bar',
         data: {
           labels: JSON.parse(el.dataset.labels),
@@ -79,8 +82,14 @@
         }
       });
     }
-    buildChart('accessChart',  '#10b981');
-    buildChart('entriesChart', '#60a5fa');
+    function buildCharts() {
+      buildChart('accessChart',  '#10b981');
+      buildChart('entriesChart', '#60a5fa');
+    }
+    buildCharts();
+    document.addEventListener('turbo:frame-load', function(event) {
+      if (event.target.id === 'event_dashboard_chart_frame') buildCharts();
+    });
   })();
 </script>
 
