@@ -7,7 +7,7 @@ class EventsController < ApplicationController
     if @event.draft?
       redirect_to root_path, alert: "このイベントは現在非公開です。"
     else
-      PageView.create!(event: @event, cookie_uuid: cookies[:cookie_uuid])
+      PageView.create(event: @event, cookie_uuid: cookies[:cookie_uuid])
       @my_entry = current_user ? @event.entries.find_by(user_id: current_user.id) : nil
     end
   end

@@ -15,9 +15,17 @@ class SmsVerificationsController < ApplicationController
     end
 
     code = SmsVerificationService.generate_code
-    current_user.update!(phone_number: phone_number)
-    current_user.sms_verification&.destroy
-    current_user.create_sms_verification!(code: code, sent_at: Time.current)
+
+    begin
+      ActiveRecord::Base.transaction do
+        current_user.update!(phone_number: phone_number)
+        current_user.sms_verification&.destroy
+        current_user.create_sms_verification!(code: code, sent_at: Time.current)
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      flash.now[:alert] = e.record.errors.full_messages.first
+      return render :new
+    end
 
     if ENV['SMS_MOCK_MODE'] == 'true'
       # MVPデモ用：SMS未送信でコードを画面表示
