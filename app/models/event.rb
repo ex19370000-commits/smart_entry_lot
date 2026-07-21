@@ -47,16 +47,18 @@ class Event < ApplicationRecord
 
     winner_ids = all_entries.sample(winner_count).map(&:id)
 
+    now = Time.current
     ActiveRecord::Base.transaction do
-      # 当選者にチェックイントークンを発行
+      # 当選者はチェックイントークンを個別発行するため1件ずつ更新（当選者数は少数のため実害なし）
       winner_ids.each do |entry_id|
         entries.where(id: entry_id).update_all(
           result: Entry.results[:win],
-          checkin_token: SecureRandom.hex(16)
+          checkin_token: SecureRandom.hex(16),
+          updated_at: now
         )
       end
-      entries.where.not(id: winner_ids).update_all(result: Entry.results[:lose])
-      update!(lottery_executed_at: Time.current)
+      entries.where.not(id: winner_ids).update_all(result: Entry.results[:lose], updated_at: now)
+      update!(lottery_executed_at: now)
     end
 
     LotteryNotificationJob.perform_later(id)

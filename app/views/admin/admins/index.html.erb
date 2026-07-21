@@ -32,8 +32,14 @@
             <td style="font-size: 13px; color: var(--admin-text-muted);"><%= l admin.created_at, format: :short %></td>
             <td>
               <div class="admin-action-links">
+                <% event_count = admin.events.size %>
+                <% confirm_message = if event_count.positive?
+                     "「#{admin.display_name}」には #{event_count} 件のイベントが紐づいています。\\n削除するとイベント・応募データもすべて削除されます。\\n本当に削除しますか？"
+                   else
+                     "「#{admin.display_name}」を削除しますか？"
+                   end %>
                 <%= button_to admin_admin_path(admin), method: :delete,
-                      form: { onsubmit: "return confirm('「#{admin.display_name}」を削除しますか？')" },
+                      form: { onsubmit: "return confirm('#{confirm_message}')" },
                       style: "background: none; border: none; padding: 0; cursor: pointer;" do %>
                   <i class="fa-solid fa-trash" style="color: #f87171;"></i>
                 <% end %>
