@@ -49,6 +49,10 @@ gem "good_job"      # DB（PostgreSQL）ベースの非同期・定期実行
 gem "rqrcode"       # 応募用QRコード生成用
 gem "kaminari"      # ページネーション
 
+# --- エラー監視 ---
+gem "sentry-ruby"
+gem "sentry-rails"
+
 # --- その他便利なgem ---
 gem 'rails-i18n' # 日本語化
 gem 'enum_help' # enumの日本語化

@@ -19,6 +19,7 @@ class AutoLotteryJob < ApplicationJob
         Rails.logger.info("[AutoLottery] Event #{event.id} 抽選完了")
       rescue => e
         Rails.logger.error("[AutoLottery] Event #{event.id} 失敗: #{e.message}")
+        Sentry.capture_exception(e, extra: { event_id: event.id })
       end
     end
   end
