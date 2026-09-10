@@ -1,11 +1,20 @@
 <% content_for :breadcrumb, '管理画面 / イベント一覧' %>
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 12px;">
   <h1 style="font-size: 24px; font-weight: 700;">イベント一覧</h1>
-  
-  <%= link_to new_admin_event_path, class: "btn-primary" do %>
-    <i class="fa-solid fa-plus"></i>
-    <span>新規イベント作成</span>
-  <% end %>
+
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <%= form_with url: admin_events_path, method: :get, local: true, style: "display: flex; gap: 8px;" do %>
+      <input type="hidden" name="sort" value="<%= @sort %>">
+      <input type="hidden" name="direction" value="<%= @direction %>">
+      <input type="text" name="q" value="<%= @q %>" placeholder="イベント名で検索"
+             style="width: 220px; background-color: var(--admin-bg-dark); border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 8px; padding: 10px 15px; color: var(--admin-text-main); font-family: inherit; font-size: 15px; color-scheme: dark;">
+      <button type="submit" class="btn-primary">検索</button>
+    <% end %>
+    <%= link_to new_admin_event_path, class: "btn-primary" do %>
+      <i class="fa-solid fa-plus"></i>
+      <span>新規イベント作成</span>
+    <% end %>
+  </div>
 </div>
 
 <div class="admin-table-container">
@@ -13,12 +22,16 @@
     <thead>
       <tr>
         <th style="width: 80px;">画像</th>
-        <th>タイトル</th>
+        <th>
+          <%= link_to "タイトル", admin_events_path(q: @q, sort: 'title', direction: (@sort == 'title' && @direction == 'asc') ? 'desc' : 'asc'), style: "color: inherit;" %>
+        </th>
         <th>ステータス</th>
         <th>抽選ステータス</th>
         <th>応募者数</th>
         <th>当選者数 / 抽選枠数</th>
-        <th>開催期間</th>
+        <th>
+          <%= link_to "開催期間", admin_events_path(q: @q, sort: 'entry_end_at', direction: (@sort == 'entry_end_at' && @direction == 'asc') ? 'desc' : 'asc'), style: "color: inherit;" %>
+        </th>
         <% if current_admin.role_owner? %>
           <th>店舗名</th>
         <% end %>

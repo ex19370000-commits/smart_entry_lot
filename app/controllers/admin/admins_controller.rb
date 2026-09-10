@@ -4,7 +4,14 @@ class Admin::AdminsController < ApplicationController
   layout 'admin'
 
   def index
-    @store_admins = Admin.role_store.includes(:events).order(created_at: :desc)
+    scope = Admin.role_store.includes(:events)
+
+    @q = params[:q].to_s.strip
+    scope = scope.where('display_name ILIKE :q OR email ILIKE :q', q: "%#{@q}%") if @q.present?
+
+    @sort = %w[created_at display_name].include?(params[:sort]) ? params[:sort] : 'created_at'
+    @direction = params[:direction] == 'asc' ? 'asc' : 'desc'
+    @store_admins = scope.order(@sort => @direction)
   end
 
   def new
