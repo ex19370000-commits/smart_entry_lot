@@ -2,15 +2,21 @@ class Admin::EventsController < ApplicationController
   include Chartable
 
   before_action :require_admin_login
-  before_action :set_event, only: %i[show edit update destroy draw_lottery dashboard export_entries notification_status scanner verify_checkin]
+  before_action :set_event,
+                only: %i[show edit update destroy draw_lottery dashboard export_entries notification_status scanner
+                         verify_checkin]
   layout 'admin'
 
   def index
-    @events = if current_admin.role_store?
-                current_admin.events.includes(:entries).with_attached_image.order(created_at: :desc)
-              else
-                Event.includes(:entries, :admin).with_attached_image.order(created_at: :desc)
-              end
+    scope = current_admin.role_store? ? current_admin.events : Event.all
+    scope = scope.includes(:entries, :admin).with_attached_image
+
+    @q = params[:q].to_s.strip
+    scope = scope.where('title ILIKE :q', q: "%#{@q}%") if @q.present?
+
+    @sort = %w[created_at title entry_end_at].include?(params[:sort]) ? params[:sort] : 'created_at'
+    @direction = params[:direction] == 'asc' ? 'asc' : 'desc'
+    @events = scope.order(@sort => @direction)
   end
 
   def show
@@ -39,7 +45,7 @@ class Admin::EventsController < ApplicationController
     old_scheduled_at = @event.lottery_scheduled_at
     if @event.update(event_params)
       reschedule_lottery_job(@event, old_mode, old_scheduled_at)
-      redirect_to admin_events_path, notice: "イベントを更新しました"
+      redirect_to admin_events_path, notice: 'イベントを更新しました'
     else
       render :edit, status: :unprocessable_entity
     end
@@ -48,7 +54,7 @@ class Admin::EventsController < ApplicationController
   def destroy
     cancel_lottery_job(@event)
     @event.destroy!
-    redirect_to admin_events_path, notice: "イベントを削除しました", status: :see_other
+    redirect_to admin_events_path, notice: 'イベントを削除しました', status: :see_other
   end
 
   def dashboard
@@ -86,7 +92,7 @@ class Admin::EventsController < ApplicationController
     result_labels = { 'win' => '当選', 'lose' => '落選' }
 
     csv_data = CSV.generate(headers: true, encoding: 'UTF-8') do |csv|
-      headers = ['応募日時', 'イベント名', 'LINE表示名', '電話番号']
+      headers = %w[応募日時 イベント名 LINE表示名 電話番号]
       headers << '当落結果' unless winners_only
       csv << headers
 
@@ -112,7 +118,10 @@ class Admin::EventsController < ApplicationController
     cancel_lottery_job(@event)
     @event.execute_lottery!
     respond_to do |format|
-      format.html { redirect_to admin_event_path(@event), notice: "抽選を実行しました。当選者 #{@event.winner_count} 名が選出されました。", status: :see_other }
+      format.html do
+        redirect_to admin_event_path(@event), notice: "抽選を実行しました。当選者 #{@event.winner_count} 名が選出されました。",
+                                              status: :see_other
+      end
       format.json { render json: { redirect_url: admin_event_path(@event) } }
     end
   rescue RuntimeError => e
@@ -123,7 +132,7 @@ class Admin::EventsController < ApplicationController
   end
 
   def scanner
-    redirect_to admin_event_path(@event), alert: "このイベントはチェックイン機能が無効です" unless @event.checkin_enabled?
+    redirect_to admin_event_path(@event), alert: 'このイベントはチェックイン機能が無効です' unless @event.checkin_enabled?
   end
 
   def verify_checkin
@@ -186,7 +195,8 @@ class Admin::EventsController < ApplicationController
   end
 
   def event_params
-    params.require(:event).permit(:title, :description, :entry_start_at, :entry_end_at, :lottery_status, :winner_count, :image, :lottery_mode, :lottery_scheduled_at, :checkin_enabled)
+    params.require(:event).permit(:title, :description, :entry_start_at, :entry_end_at, :lottery_status, :winner_count,
+                                  :image, :lottery_mode, :lottery_scheduled_at, :checkin_enabled)
   end
 
   def schedule_lottery_job(event)
@@ -209,7 +219,7 @@ class Admin::EventsController < ApplicationController
 
     begin
       Object.const_get('GoodJob::Job').find_by(id: event.scheduled_job_id)&.discard
-    rescue => e
+    rescue StandardError => e
       Rails.logger.warn("[LotteryJob] スケジュール済みジョブのキャンセル失敗: #{e.message}")
       Sentry.capture_exception(e, extra: { event_id: event.id, scheduled_job_id: event.scheduled_job_id })
     ensure
