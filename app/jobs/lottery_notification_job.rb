@@ -19,6 +19,7 @@ class LotteryNotificationJob < ApplicationJob
                       "当選:#{winner_uids.size}件 落選:#{loser_uids.size}件")
   rescue => e
     Rails.logger.error("[LotteryNotification] Event #{event_id} 通知失敗: #{e.message}")
+    Sentry.capture_exception(e, extra: { event_id: event_id })
   end
 
   private
@@ -28,6 +29,7 @@ class LotteryNotificationJob < ApplicationJob
       success = service.multicast(batch, message)
       unless success
         Rails.logger.warn("[LotteryNotification] multicast 失敗 #{batch.size}件")
+        Sentry.capture_message("[LotteryNotification] multicast失敗 #{batch.size}件", level: :warning)
       end
     end
   end

@@ -1,0 +1,96 @@
+<% content_for :breadcrumb, '管理画面 / ユーザー管理 / ユーザー詳細' %>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+  <h1 style="font-size: 24px; font-weight: 700;"><%= @user.display_name.presence || '（表示名未設定）' %></h1>
+  <div style="display: flex; gap: 10px;">
+    <% if @user.blocked? %>
+      <%= button_to unblock_admin_user_path(@user), method: :patch, class: "btn-primary",
+            form: { style: "display:inline;" } do %>
+        ブロックを解除する
+      <% end %>
+    <% else %>
+      <%= button_to block_admin_user_path(@user), method: :patch,
+            form: { style: "display:inline;", onsubmit: "return confirm('「#{j @user.display_name}」をブロックしますか？ブロック中はLINEログインができなくなります')" },
+            style: "background: #fbbf24; color: #1a1a1a; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;" do %>
+        ブロックする
+      <% end %>
+    <% end %>
+    <%= button_to admin_user_path(@user), method: :delete,
+          form: { style: "display:inline;", onsubmit: "return confirm('「#{j @user.display_name}」を削除しますか？応募履歴もすべて削除されます')" },
+          style: "background: #f87171; color: #1a1a1a; border: none; padding: 10px 18px; border-radius: 6px; font-weight: 600; cursor: pointer;" do %>
+      削除する
+    <% end %>
+  </div>
+</div>
+
+<div class="admin-table-container" style="padding: 24px; margin-bottom: 24px;">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+    <div>
+      <p style="font-size: 13px; color: var(--admin-text-muted); margin: 0 0 4px;">状態</p>
+      <% if @user.blocked? %>
+        <p style="font-weight: 600; color: #f87171;">ブロック中（<%= l @user.blocked_at.in_time_zone('Asia/Tokyo'), format: :short %>〜）</p>
+      <% else %>
+        <p style="font-weight: 600; color: #4ade80;">有効</p>
+      <% end %>
+    </div>
+    <div>
+      <p style="font-size: 13px; color: var(--admin-text-muted); margin: 0 0 4px;">電話番号</p>
+      <p style="font-weight: 600;"><%= @user.phone_number.presence || '—' %></p>
+    </div>
+    <div>
+      <p style="font-size: 13px; color: var(--admin-text-muted); margin: 0 0 4px;">SMS認証</p>
+      <p style="font-weight: 600;"><%= @user.phone_verified? ? '認証済み' : '未認証' %></p>
+    </div>
+    <div>
+      <p style="font-size: 13px; color: var(--admin-text-muted); margin: 0 0 4px;">LINEユーザーID</p>
+      <p style="font-weight: 600; font-family: monospace; font-size: 13px;"><%= @user.line_uid.presence || '—' %></p>
+    </div>
+    <div>
+      <p style="font-size: 13px; color: var(--admin-text-muted); margin: 0 0 4px;">登録日時</p>
+      <p style="font-weight: 600;"><%= l @user.created_at, format: :short %></p>
+    </div>
+  </div>
+</div>
+
+<h2 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">応募履歴（<%= @entries.size %> 件）</h2>
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>イベント名</th>
+        <th>応募日時</th>
+        <th>抽選結果</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if @entries.any? %>
+        <% @entries.each do |entry| %>
+          <tr>
+            <td style="font-weight: 600;">
+              <%= link_to entry.event.title, admin_event_path(entry.event), style: "color: inherit;" %>
+            </td>
+            <td style="font-size: 13px; color: var(--admin-text-muted);"><%= l entry.created_at, format: :short %></td>
+            <td style="font-size: 13px;">
+              <% if entry.event.already_drawn? %>
+                <% if entry.win? %>
+                  <span style="color: #4ade80;">当選</span>
+                <% else %>
+                  <span style="color: var(--admin-text-muted);">落選</span>
+                <% end %>
+              <% else %>
+                <span style="color: var(--admin-text-muted);">抽選前</span>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr>
+          <td colspan="3" style="text-align: center; color: var(--admin-text-muted); padding: 40px;">
+            応募履歴はありません
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

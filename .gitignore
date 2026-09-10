@@ -30,3 +30,7 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 .env
+
+# Claude Codeのプロジェクト指示ファイル（GitHubには公開しない）
+/CLAUDE.md
+.DS_Store

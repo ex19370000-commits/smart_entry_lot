@@ -211,6 +211,7 @@ class Admin::EventsController < ApplicationController
       Object.const_get('GoodJob::Job').find_by(id: event.scheduled_job_id)&.discard
     rescue => e
       Rails.logger.warn("[LotteryJob] スケジュール済みジョブのキャンセル失敗: #{e.message}")
+      Sentry.capture_exception(e, extra: { event_id: event.id, scheduled_job_id: event.scheduled_job_id })
     ensure
       event.update_column(:scheduled_job_id, nil)
     end

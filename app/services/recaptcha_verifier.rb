@@ -30,7 +30,8 @@ class RecaptchaVerifier
     )
   rescue StandardError => e
     Rails.logger.error("[reCAPTCHA] 検証リクエスト失敗: #{e.message}")
-    # ネットワーク障害時は通過させる（ユーザー体験優先）
+    # ネットワーク障害時は通過させる設計のため、ボット対策が無効化されている事実をSentryに通知する
+    Sentry.capture_exception(e, level: :warning, extra: { note: 'reCAPTCHA検証がスキップされ、応募がボット対策なしで通過しています' })
     Result.new(success: true, score: 1.0, action: nil, error_codes: [])
   end
 end

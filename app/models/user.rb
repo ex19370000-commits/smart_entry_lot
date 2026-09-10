@@ -11,4 +11,11 @@ class User < ApplicationRecord
   validates :password_confirmation, presence: true, if: -> { new_record? && line_uid.blank? }
 
   validates :phone_number, uniqueness: true, allow_nil: true
+
+  scope :blocked, -> { where.not(blocked_at: nil) }
+  scope :active, -> { where(blocked_at: nil) }
+
+  def blocked?
+    blocked_at.present?
+  end
 end
