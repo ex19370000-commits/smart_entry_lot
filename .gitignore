@@ -33,3 +33,4 @@
 
 # Claude Codeのプロジェクト指示ファイル（GitHubには公開しない）
 /CLAUDE.md
+.DS_Store

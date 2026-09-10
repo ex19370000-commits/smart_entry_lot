@@ -27,6 +27,13 @@
         <% end %>
       </li>
 
+      <%# ユーザー管理（owner:全ユーザー / store:自店舗イベントの応募者のみ） %>
+      <li class="<%= 'active' if controller_name == 'users' %>">
+        <%= link_to admin_users_path do %>
+          <i class="fa-solid fa-users"></i> ユーザー管理
+        <% end %>
+      </li>
+
       <% if current_admin.role_owner? %>
         <li class="<%= 'active' if controller_name == 'admins' %>">
           <%= link_to admin_admins_path do %>
@@ -37,9 +44,6 @@
           <%= link_to new_admin_admin_path do %>
             <i class="fa-solid fa-user-plus"></i> アカウント発行
           <% end %>
-        </li>
-        <li>
-          <a href="#"><i class="fa-solid fa-users"></i> ユーザー管理</a>
         </li>
       <% end %>
     </ul>

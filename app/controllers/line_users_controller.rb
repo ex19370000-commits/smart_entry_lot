@@ -5,13 +5,18 @@ class LineUsersController < ApplicationController
   skip_before_action :verify_authenticity_token, only: [:create]
 
   def create
-    return render json: { status: 'error', message: 'access_token is required' }, status: :bad_request if params[:access_token].blank?
+    if params[:access_token].blank?
+      return render json: { status: 'error', message: 'access_token is required' },
+                    status: :bad_request
+    end
 
     # LINE サーバーでトークンを検証し、正規の line_uid を取得
     line_uid = verify_line_token(params[:access_token])
     return render json: { status: 'error', message: 'Invalid LINE access token' }, status: :unauthorized unless line_uid
 
     user = User.find_or_initialize_by(line_uid: line_uid)
+    return render json: { status: 'error', message: 'このアカウントはご利用いただけません' }, status: :forbidden if user.blocked?
+
     user.display_name = params[:name]
     user.picture_url = params[:picture_url]
 
@@ -34,7 +39,7 @@ class LineUsersController < ApplicationController
 
   def verify_line_token(access_token)
     # LIFFのPKCEトークンはVerify APIにaudが含まれないため、Profile APIで検証する
-    uri = URI("https://api.line.me/v2/profile")
+    uri = URI('https://api.line.me/v2/profile')
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     request = Net::HTTP::Get.new(uri)

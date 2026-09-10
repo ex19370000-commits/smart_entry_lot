@@ -40,8 +40,19 @@ Rails.application.routes.draw do
 
     # 店舗アカウント発行（owner のみ）
     resources :admins, only: %i[index new create destroy]
+
+    # ユーザー管理（応募者=Userの一覧・詳細・削除・ブロック）
+    resources :users, only: %i[index show destroy] do
+      member do
+        patch :block
+        patch :unblock
+      end
+      collection do
+        get :export
+      end
+    end
   end
-  
+
   # 一般応募者用のルーティング（IDではなく public_token で検索する）
   resources :events, param: :public_token, only: %i[show]
 

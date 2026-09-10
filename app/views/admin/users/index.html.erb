@@ -1,0 +1,94 @@
+<% content_for :breadcrumb, '管理画面 / ユーザー管理' %>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 12px;">
+  <h1 style="font-size: 24px; font-weight: 700;">ユーザー管理</h1>
+
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <%= form_with url: admin_users_path, method: :get, local: true, style: "display: flex; gap: 8px;" do %>
+      <input type="hidden" name="sort" value="<%= @sort %>">
+      <input type="hidden" name="direction" value="<%= @direction %>">
+      <input type="text" name="q" value="<%= @q %>" placeholder="表示名・電話番号・LINE IDで検索"
+             style="width: 260px; background-color: var(--admin-bg-dark); border: 1px solid rgba(255, 255, 255, 0.35); border-radius: 8px; padding: 10px 15px; color: var(--admin-text-main); font-family: inherit; font-size: 15px; color-scheme: dark;">
+      <button type="submit" class="btn-primary">検索</button>
+    <% end %>
+    <%= link_to "CSVダウンロード", export_admin_users_path(q: @q), class: "btn-primary" %>
+  </div>
+</div>
+
+<div class="admin-table-container">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>
+          <%= link_to "表示名", admin_users_path(q: @q, sort: 'display_name', direction: (@sort == 'display_name' && @direction == 'asc') ? 'desc' : 'asc'), style: "color: inherit;" %>
+        </th>
+        <th>電話番号</th>
+        <th>SMS認証</th>
+        <th>応募件数</th>
+        <th>
+          <%= link_to "登録日時", admin_users_path(q: @q, sort: 'created_at', direction: (@sort == 'created_at' && @direction == 'asc') ? 'desc' : 'asc'), style: "color: inherit;" %>
+        </th>
+        <th>状態</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if @users.any? %>
+        <% @users.each do |user| %>
+          <tr>
+            <td style="font-weight: 600;">
+              <%= link_to user.display_name.presence || '（表示名未設定）', admin_user_path(user), style: "color: inherit;" %>
+            </td>
+            <td style="color: var(--admin-text-muted);"><%= user.phone_number.presence || '—' %></td>
+            <td style="font-size: 13px;">
+              <% if user.phone_verified? %>
+                <span style="color: #4ade80;">認証済み</span>
+              <% else %>
+                <span style="color: var(--admin-text-muted);">未認証</span>
+              <% end %>
+            </td>
+            <td style="font-size: 13px;"><%= user.entries.size %> 件</td>
+            <td style="font-size: 13px; color: var(--admin-text-muted);"><%= l user.created_at, format: :short %></td>
+            <td style="font-size: 13px;">
+              <% if user.blocked? %>
+                <span style="color: #f87171;">ブロック中</span>
+              <% else %>
+                <span style="color: #4ade80;">有効</span>
+              <% end %>
+            </td>
+            <td>
+              <div class="admin-action-links" style="display: flex; gap: 10px; align-items: center;">
+                <%= link_to admin_user_path(user), style: "color: inherit;" do %>
+                  <i class="fa-solid fa-eye"></i>
+                <% end %>
+                <% if user.blocked? %>
+                  <%= button_to unblock_admin_user_path(user), method: :patch,
+                        form: { style: "display:inline;" },
+                        style: "background: none; border: none; padding: 0; cursor: pointer; color: #4ade80;" do %>
+                    <i class="fa-solid fa-lock-open"></i>
+                  <% end %>
+                <% else %>
+                  <%= button_to block_admin_user_path(user), method: :patch,
+                        form: { style: "display:inline;", onsubmit: "return confirm('「#{j user.display_name}」をブロックしますか？ブロック中はLINEログインができなくなります')" },
+                        style: "background: none; border: none; padding: 0; cursor: pointer; color: #fbbf24;" do %>
+                    <i class="fa-solid fa-lock"></i>
+                  <% end %>
+                <% end %>
+                <%= button_to admin_user_path(user), method: :delete,
+                      form: { style: "display:inline;", onsubmit: "return confirm('「#{j user.display_name}」を削除しますか？応募履歴もすべて削除されます')" },
+                      style: "background: none; border: none; padding: 0; cursor: pointer;" do %>
+                  <i class="fa-solid fa-trash" style="color: #f87171;"></i>
+                <% end %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      <% else %>
+        <tr>
+          <td colspan="7" style="text-align: center; color: var(--admin-text-muted); padding: 40px;">
+            該当するユーザーはいません
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
